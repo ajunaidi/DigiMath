@@ -12,13 +12,41 @@
     <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://js.puter.com/v2/"></script>
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=11">
+    <style>
+        /* Add some specific inline styles for eye-candy that might not be in styles.css yet */
+        .hero-math-float {
+            margin-top: 80px;
+            opacity: 0.8;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            box-shadow: 0 0 0 rgba(99, 102, 241, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+    </style>
 </head>
 <body>
     <!-- Premium Navigation -->
     <nav class="navbar">
         <a href="index.html" class="brand">
-            <div class="brand-icon">∑</div>
+            <div class="brand-icon"><i class="fa-solid fa-atom"></i></div>
             <div class="brand-text">Digi<span>Math</span></div>
         </a>
         <div class="nav-links">
@@ -31,24 +59,28 @@
             <button class="btn btn-primary" onclick="showModal('signupModal')">Sign Up</button>
         </div>
         <div id="userMenu" class="nav-links" style="display: none;">
-            <div class="brand-text" id="userNameDisplay" style="font-size:14px; margin-right:10px">User</div>
-            <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
+            <div class="brand-text" id="userNameDisplay" style="font-size:14px; margin-right:20px; color:var(--text-main)">User</div>
+            <button class="btn btn-secondary" onclick="handleLogout()" style="padding: 8px 20px; font-size: 13px;">Logout</button>
         </div>
     </nav>
 
-    <!-- Hero Section with 3D Mathematical Feel -->
+    <!-- Hero Section -->
     <header class="hero">
         <div class="container">
-            <div class="hero-badge">Next-Gen Academic Productivity</div>
+            <div class="hero-badge">
+                <span class="pulse"></span>
+                Next-Gen Academic Productivity
+            </div>
             <h1 class="hero-h1">The Complete<br><span class="gradient-text">Math Workspace.</span></h1>
             <p class="hero-p">A specialized toolset designed for MSc students to solve, research, and document high-level mathematics with the power of AI.</p>
-            <div style="display: flex; gap: 16px; justify-content: center;">
+            
+            <div style="display: flex; gap: 20px; justify-content: center;">
                 <a href="tools.html" class="btn btn-primary">Launch AI Tools</a>
                 <a href="#editor-section" class="btn btn-secondary">Open Editor</a>
             </div>
             
-            <div style="margin-top: 80px; opacity: 0.9;">
-                <div id="heroMath" style="font-size: 32px; color: var(--text-sub);">
+            <div class="hero-math-float">
+                <div id="heroMath">
                     $$\oint_C \mathbf{E} \cdot d\mathbf{l} = -\frac{d}{dt} \iint_S \mathbf{B} \cdot d\mathbf{S}$$
                 </div>
             </div>
@@ -56,21 +88,21 @@
     </header>
 
     <!-- Workspace Features Section -->
-    <section class="features" id="features">
+    <section class="features" id="features" style="padding-bottom: 100px;">
         <div class="container">
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">∑</div>
+                    <div class="feature-icon"><i class="fa-solid fa-square-root-variable"></i></div>
                     <h3>AI Math Solver</h3>
                     <p>Solve complex integrals, matrices, and theorems with step-by-step logic.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⧉</div>
+                    <div class="feature-icon"><i class="fa-solid fa-camera-retro"></i></div>
                     <h3>Image OCR</h3>
                     <p>Convert handwritten notes into clean LaTeX and Word documents instantly.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">≡</div>
+                    <div class="feature-icon"><i class="fa-solid fa-file-pen"></i></div>
                     <h3>Thesis Writer</h3>
                     <p>Generate academic-grade abstracts and proofs for your mathematical research.</p>
                 </div>
@@ -79,37 +111,40 @@
     </section>
 
     <!-- Integrated Workspace Editor -->
-    <section class="editor-section" id="editor-section">
-        <div class="container">
+    <section class="editor-section" id="editor-section" style="padding: 100px 0;">
+        <div class="container-large">
             <div class="workspace-card">
-                <div class="modal-header" style="text-align:left; margin-bottom:40px">
-                    <h2 class="modal-title">Math <span class="gradient-text">Editor</span></h2>
-                    <p class="modal-subtitle">Professional LaTeX drafting for your research.</p>
+                <div style="text-align:left; margin-bottom:48px">
+                    <h2 class="hero-h1" style="font-size: 40px; margin-bottom:12px; text-align:left;">Math <span class="gradient-text">Editor</span></h2>
+                    <p class="hero-p" style="margin:0; font-size:16px; text-align:left;">Professional LaTeX drafting for your research.</p>
                 </div>
                 
                 <div class="workspace-grid">
                     <div class="editor-panel">
-                        <div class="field-label">Voice & Text Input</div>
-                        <div class="input-wrapper">
+                        <label class="field-label">Voice & Text Input</label>
+                        <div style="position:relative">
                             <textarea id="latexInput" class="ai-textarea" placeholder="Type or use voice to input math..."></textarea>
-                            <button class="inline-mic-btn" onclick="VoiceInput.toggleInline(this, 'latexInput')">🎤</button>
+                            <button class="inline-mic-btn" onclick="VoiceInput.toggleInline(this, 'latexInput')" 
+                                    style="position:absolute; bottom:20px; right:20px; background:var(--bg-app); border:1px solid var(--border-glass); color:white; width:44px; height:44px; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--transition-base);">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
                         </div>
                         
-                        <div class="tool-btn-group">
-                            <button class="tool-btn" onclick="insertSymbol('\\int')">∫</button>
-                            <button class="tool-btn" onclick="insertSymbol('\\sum')">Σ</button>
-                            <button class="tool-btn" onclick="insertSymbol('\\infty')">∞</button>
-                            <button class="tool-btn" onclick="insertSymbol('\\pi')">π</button>
-                            <button class="tool-btn" onclick="insertSymbol('\\sqrt{}')">√</button>
+                        <div style="display: flex; gap: 8px; margin-top: 16px;">
+                            <button class="btn btn-secondary" style="padding:8px 16px; font-size:13px; border-radius:8px;" onclick="insertSymbol('\\int')">∫</button>
+                            <button class="btn btn-secondary" style="padding:8px 16px; font-size:13px; border-radius:8px;" onclick="insertSymbol('\\sum')">Σ</button>
+                            <button class="btn btn-secondary" style="padding:8px 16px; font-size:13px; border-radius:8px;" onclick="insertSymbol('\\infty')">∞</button>
+                            <button class="btn btn-secondary" style="padding:8px 16px; font-size:13px; border-radius:8px;" onclick="insertSymbol('\\pi')">π</button>
+                            <button class="btn btn-secondary" style="padding:8px 16px; font-size:13px; border-radius:8px;" onclick="insertSymbol('\\sqrt{}')">√</button>
                         </div>
                     </div>
                     
                     <div class="editor-panel">
-                        <div class="field-label">Live Preview</div>
+                        <label class="field-label">Live Preview</label>
                         <div class="preview-window" id="previewArea">
                             <span style="color:var(--text-dim)">Preview will appear here...</span>
                         </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px">
                             <button class="btn btn-primary" onclick="saveEquation()">Save Equation</button>
                             <button class="btn btn-secondary" onclick="exportToWord()">Export Word</button>
                         </div>
@@ -119,51 +154,51 @@
         </div>
     </section>
 
-    <!-- Login Modal (Modern Glass) -->
+    <!-- Login Modal -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Welcome Back</h2>
-                <p class="modal-subtitle">Login to access your research dashboard.</p>
+            <div style="margin-bottom: 32px; text-align: center;">
+                <h2 class="hero-h1" style="font-size: 32px; margin-bottom: 8px;">Welcome Back</h2>
+                <p style="color: var(--text-sub); font-size: 14px;">Login to access your research dashboard.</p>
             </div>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label class="form-label">Email</label>
+                    <label class="field-label">Email</label>
                     <input type="email" id="loginEmail" class="form-input" placeholder="test@test.com" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Password</label>
+                    <label class="field-label">Password</label>
                     <input type="password" id="loginPass" class="form-input" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width:100%">Sign In</button>
             </form>
-            <button class="btn btn-secondary" style="width:100%; margin-top:12px" onclick="hideModal('loginModal')">Cancel</button>
+            <button class="btn btn-secondary" style="width:100%; margin-top:16px" onclick="hideModal('loginModal')">Cancel</button>
         </div>
     </div>
 
     <!-- Signup Modal -->
     <div class="modal-overlay" id="signupModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Create Account</h2>
-                <p class="modal-subtitle">Start your academic journey with DigiMath.</p>
+            <div style="margin-bottom: 32px; text-align: center;">
+                <h2 class="hero-h1" style="font-size: 32px; margin-bottom: 8px;">Create Account</h2>
+                <p style="color: var(--text-sub); font-size: 14px;">Start your academic journey with DigiMath.</p>
             </div>
             <form onsubmit="handleSignup(event)">
                 <div class="form-group">
-                    <label class="form-label">Full Name</label>
+                    <label class="field-label">Full Name</label>
                     <input type="text" id="signupName" class="form-input" placeholder="Alex Turner" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Email</label>
+                    <label class="field-label">Email</label>
                     <input type="email" id="signupEmail" class="form-input" placeholder="alex@example.com" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Password</label>
+                    <label class="field-label">Password</label>
                     <input type="password" id="signupPass" class="form-input" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width:100%">Sign Up</button>
             </form>
-            <button class="btn btn-secondary" style="width:100%; margin-top:12px" onclick="hideModal('signupModal')">Cancel</button>
+            <button class="btn btn-secondary" style="width:100%; margin-top:16px" onclick="hideModal('signupModal')">Cancel</button>
         </div>
     </div>
 
@@ -176,6 +211,6 @@
     <script src="database.js?v=2"></script>
     <script src="parser.js?v=2"></script>
     <script src="voice-global.js?v=2"></script>
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=11"></script>
 </body>
 </html>

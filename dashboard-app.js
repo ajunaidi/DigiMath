@@ -10,27 +10,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   const supaReady = initSupabase();
 
   // Nav toggle
-  document.getElementById('navToggle').addEventListener('click', () => {
-    document.getElementById('navLinks').classList.toggle('open');
-  });
+  const navToggle = document.getElementById('navToggle');
+  if (navToggle) {
+    navToggle.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+  }
 
   // Auth state
   Auth.init(async (user, event) => {
     if (user) {
-      document.getElementById('dashboardMain').style.display = '';
-      document.getElementById('notLoggedIn').style.display = 'none';
+      if (document.getElementById('dashboardMain')) document.getElementById('dashboardMain').style.display = '';
+      if (document.getElementById('notLoggedIn')) document.getElementById('notLoggedIn').style.display = 'none';
       const profile = await DB.getProfile();
       const name = profile?.full_name || user.email?.split('@')[0] || 'User';
-      document.getElementById('dashUserName').textContent = name;
-      document.getElementById('userName').textContent = name;
-      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+      if (document.getElementById('dashUserName')) document.getElementById('dashUserName').textContent = name;
+      if (document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').textContent = name;
+      if (document.getElementById('userAvatar')) document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
       loadDashboard();
     } else {
       // If not logged in, still show dashboard with localStorage data
-      document.getElementById('dashboardMain').style.display = '';
-      document.getElementById('notLoggedIn').style.display = 'none';
-      document.getElementById('dashUserName').textContent = 'Guest';
-      document.getElementById('userName').textContent = 'Guest';
+      if (document.getElementById('dashboardMain')) document.getElementById('dashboardMain').style.display = '';
+      if (document.getElementById('notLoggedIn')) document.getElementById('notLoggedIn').style.display = 'none';
+      if (document.getElementById('dashUserName')) document.getElementById('dashUserName').textContent = 'Guest';
+      if (document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').textContent = 'Guest';
       loadDashboard();
     }
   });
@@ -93,12 +96,12 @@ async function loadEquations() {
         </div>
         <div class="item-card-math" id="eq-${eq.id}"></div>
         <div class="item-card-meta">
-          <span class="item-meta-tag">📅 ${new Date(eq.created_at).toLocaleDateString()}</span>
+          <span class="item-meta-tag"><i class="fa-solid fa-calendar-days"></i> ${new Date(eq.created_at).toLocaleDateString()}</span>
         </div>
         <div class="item-card-actions">
-          <button class="action-btn" onclick="copyText('${escapeLatex(eq.latex)}')">📋 Copy LaTeX</button>
-          <button class="action-btn" onclick="loadInEditor('${escapeLatex(eq.latex)}')">✏️ Edit</button>
-          <button class="action-btn" style="color:var(--danger)" onclick="deleteEquation('${eq.id}')">🗑️ Delete</button>
+          <button class="action-btn" onclick="copyText('${escapeLatex(eq.latex)}')"><i class="fa-solid fa-clipboard"></i> Copy LaTeX</button>
+          <button class="action-btn" onclick="loadInEditor('${escapeLatex(eq.latex)}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+          <button class="action-btn" style="color:var(--danger)" onclick="deleteEquation('${eq.id}')"><i class="fa-solid fa-trash-can"></i> Delete</button>
         </div>
       `;
       grid.appendChild(card);
@@ -125,15 +128,15 @@ async function loadDocuments() {
       card.className = 'item-card';
       card.innerHTML = `
         <div class="item-card-header">
-          <div class="item-card-title">📄 ${doc.title}</div>
+          <div class="item-card-title"><i class="fa-solid fa-file-lines"></i> ${doc.title}</div>
         </div>
         ${doc.content ? `<div class="item-card-notes">${doc.content.substring(0, 150)}${doc.content.length > 150 ? '...' : ''}</div>` : ''}
         <div class="item-card-meta">
-          <span class="item-meta-tag">📐 ${eqCount} equation${eqCount !== 1 ? 's' : ''}</span>
-          <span class="item-meta-tag">📅 ${new Date(doc.updated_at || doc.created_at).toLocaleDateString()}</span>
+          <span class="item-meta-tag"><i class="fa-solid fa-square-root-variable"></i> ${eqCount} equation${eqCount !== 1 ? 's' : ''}</span>
+          <span class="item-meta-tag"><i class="fa-solid fa-calendar-days"></i> ${new Date(doc.updated_at || doc.created_at).toLocaleDateString()}</span>
         </div>
         <div class="item-card-actions">
-          <button class="action-btn" style="color:var(--danger)" onclick="deleteDoc('${doc.id}')">🗑️ Delete</button>
+          <button class="action-btn" style="color:var(--danger)" onclick="deleteDoc('${doc.id}')"><i class="fa-solid fa-trash-can"></i> Delete</button>
         </div>
       `;
       grid.appendChild(card);
@@ -163,12 +166,12 @@ async function loadAssignments() {
       if (isOverdue) card.style.borderColor = 'rgba(239,68,68,0.4)';
       card.innerHTML = `
         <div class="item-card-header">
-          <div class="item-card-title">📝 ${a.title}</div>
+          <div class="item-card-title"><i class="fa-solid fa-file-pen"></i> ${a.title}</div>
           <span class="item-card-badge ${badgeClass}">${a.status}</span>
         </div>
         <div class="item-card-meta">
-          <span class="item-meta-tag">📚 ${a.subject || 'Math'}</span>
-          <span class="item-meta-tag" ${isOverdue ? 'style="color:var(--danger)"' : ''}>📅 ${dueStr}${isOverdue ? ' ⚠️ OVERDUE' : ''}</span>
+          <span class="item-meta-tag"><i class="fa-solid fa-book"></i> ${a.subject || 'Math'}</span>
+          <span class="item-meta-tag" ${isOverdue ? 'style="color:var(--danger)"' : ''}><i class="fa-solid fa-calendar-days"></i> ${dueStr}${isOverdue ? ' ⚠️ OVERDUE' : ''}</span>
         </div>
         ${a.notes ? `<div class="item-card-notes">${a.notes.substring(0, 120)}${a.notes.length > 120 ? '...' : ''}</div>` : ''}
         <div class="item-card-actions">
@@ -177,7 +180,7 @@ async function loadAssignments() {
             <option value="in_progress" ${a.status === 'in_progress' ? 'selected' : ''}>🔄 In Progress</option>
             <option value="completed" ${a.status === 'completed' ? 'selected' : ''}>✅ Completed</option>
           </select>
-          <button class="action-btn" style="color:var(--danger)" onclick="deleteAssign('${a.id}')">🗑️ Delete</button>
+          <button class="action-btn" style="color:var(--danger)" onclick="deleteAssign('${a.id}')"><i class="fa-solid fa-trash-can"></i> Delete</button>
         </div>
       `;
       grid.appendChild(card);

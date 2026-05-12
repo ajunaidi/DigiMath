@@ -10,35 +10,26 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <a href="index.html" class="nav-brand" style="text-decoration:none">
-            <span class="brand-icon">∑</span>
-            <span class="brand-text">Math<span class="brand-accent">Voice</span></span>
+    <!-- Premium Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-atom"></i></div>
+            <div class="brand-text">Digi<span>Math</span></div>
         </a>
-        <div class="nav-links" id="navLinks">
+        <div class="nav-links">
             <a href="index.html" class="nav-link">Home</a>
-            <a href="index.html#editor-section" class="nav-link">Editor</a>
+            <a href="tools.html" class="nav-link">AI Tools</a>
             <a href="dashboard.html" class="nav-link active">Dashboard</a>
         </div>
-        <div class="nav-auth">
-            <div id="userMenu">
-                <div class="user-badge" id="userBadge" onclick="toggleUserDropdown()">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <span class="user-name" id="userName">User</span>
-                </div>
-                <div class="user-dropdown" id="userDropdown">
-                    <a href="index.html#editor-section" class="dropdown-item">✏️ Editor</a>
-                    <div class="dropdown-divider"></div>
-                    <button class="dropdown-item danger" onclick="handleLogout()">🚪 Logout</button>
-                </div>
-            </div>
+        <div id="userMenu" class="nav-links">
+            <div class="brand-text" id="userNameDisplay" style="font-size:14px; margin-right:20px; color:var(--text-main)">User</div>
+            <button class="btn btn-secondary" onclick="handleLogout()" style="padding: 8px 20px; font-size: 13px;">Logout</button>
         </div>
-        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     </nav>
 
     <!-- Dashboard Content -->
@@ -55,22 +46,22 @@
             <!-- Stats Cards -->
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
-                    <div class="stat-icon">📐</div>
+                    <div class="stat-icon"><i class="fa-solid fa-square-root-variable"></i></div>
                     <div class="stat-value" id="statEquations">0</div>
                     <div class="stat-label">Equations</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">📄</div>
+                    <div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div>
                     <div class="stat-value" id="statDocuments">0</div>
                     <div class="stat-label">Documents</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">📝</div>
+                    <div class="stat-icon"><i class="fa-solid fa-file-pen"></i></div>
                     <div class="stat-value" id="statAssignments">0</div>
                     <div class="stat-label">Assignments</div>
                 </div>
                 <div class="stat-card stat-accent">
-                    <div class="stat-icon">⏳</div>
+                    <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
                     <div class="stat-value" id="statPending">0</div>
                     <div class="stat-label">Pending</div>
                 </div>
@@ -78,15 +69,15 @@
 
             <!-- Tab Navigation -->
             <div class="dash-tabs">
-                <button class="dash-tab active" data-section="equations" onclick="switchDashTab(this)">📐 Equations</button>
-                <button class="dash-tab" data-section="documents" onclick="switchDashTab(this)">📄 Documents</button>
-                <button class="dash-tab" data-section="assignments" onclick="switchDashTab(this)">📝 Assignments</button>
+                <button class="dash-tab active" data-section="equations" onclick="switchDashTab(this)"><i class="fa-solid fa-square-root-variable"></i> Equations</button>
+                <button class="dash-tab" data-section="documents" onclick="switchDashTab(this)"><i class="fa-solid fa-file-lines"></i> Documents</button>
+                <button class="dash-tab" data-section="assignments" onclick="switchDashTab(this)"><i class="fa-solid fa-file-pen"></i> Assignments</button>
             </div>
 
             <!-- Equations Section -->
             <div class="dash-section active" id="sectionEquations">
                 <div class="section-toolbar">
-                    <h2>📐 My Equations</h2>
+                    <h2><i class="fa-solid fa-square-root-variable"></i> My Equations</h2>
                     <a href="index.html#editor-section" class="btn btn-primary btn-sm">+ New Equation</a>
                 </div>
                 <div class="items-grid" id="equationsGrid">
@@ -97,7 +88,7 @@
             <!-- Documents Section -->
             <div class="dash-section" id="sectionDocuments">
                 <div class="section-toolbar">
-                    <h2>📄 My Documents</h2>
+                    <h2><i class="fa-solid fa-file-lines"></i> My Documents</h2>
                     <button class="btn btn-primary btn-sm" onclick="showNewDocModal()">+ New Document</button>
                 </div>
                 <div class="items-grid" id="documentsGrid">
@@ -108,7 +99,7 @@
             <!-- Assignments Section -->
             <div class="dash-section" id="sectionAssignments">
                 <div class="section-toolbar">
-                    <h2>📝 My Assignments</h2>
+                    <h2><i class="fa-solid fa-file-pen"></i> My Assignments</h2>
                     <button class="btn btn-primary btn-sm" onclick="showNewAssignmentModal()">+ New Assignment</button>
                 </div>
                 <div class="items-grid" id="assignmentsGrid">
@@ -131,7 +122,7 @@
     <div class="modal-overlay" id="newDocModal">
         <div class="modal">
             <button class="modal-close" onclick="hideModal('newDocModal')">&times;</button>
-            <div class="modal-header"><div class="modal-icon">📄</div><h2>New Document</h2></div>
+            <div class="modal-header"><div class="modal-icon"><i class="fa-solid fa-file-lines"></i></div><h2>New Document</h2></div>
             <form class="auth-form" onsubmit="createDocument(event)">
                 <div class="form-group">
                     <label>Title</label>
@@ -150,7 +141,7 @@
     <div class="modal-overlay" id="newAssignmentModal">
         <div class="modal">
             <button class="modal-close" onclick="hideModal('newAssignmentModal')">&times;</button>
-            <div class="modal-header"><div class="modal-icon">📝</div><h2>New Assignment</h2></div>
+            <div class="modal-header"><div class="modal-icon"><i class="fa-solid fa-file-pen"></i></div><h2>New Assignment</h2></div>
             <form class="auth-form" onsubmit="createAssignment(event)">
                 <div class="form-group">
                     <label>Title</label>

@@ -46,25 +46,21 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateAuthUI(user) {
     const authButtons = document.getElementById('authButtons');
     const userMenu = document.getElementById('userMenu');
-    const dashboardLink = document.getElementById('dashboardLink');
-    const heroSignupBtn = document.getElementById('heroSignupBtn');
-    const saveOptions = document.getElementById('saveOptions');
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    const dashboardLink = document.querySelector('a[href="dashboard.html"]');
 
     if (user) {
       const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-      authButtons.style.display = 'none';
-      userMenu.style.display = '';
-      dashboardLink.style.display = '';
-      if (heroSignupBtn) heroSignupBtn.style.display = 'none';
-      if (saveOptions) saveOptions.style.display = '';
-      document.getElementById('userName').textContent = name;
-      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+      if (authButtons) authButtons.style.display = 'none';
+      if (userMenu) userMenu.style.display = 'flex';
+      if (userNameDisplay) userNameDisplay.textContent = name;
+      
+      // Update avatar if it exists (in dashboard)
+      const userAvatar = document.getElementById('userAvatar');
+      if (userAvatar) userAvatar.textContent = name.charAt(0).toUpperCase();
     } else {
-      authButtons.style.display = '';
-      userMenu.style.display = 'none';
-      dashboardLink.style.display = 'none';
-      if (heroSignupBtn) heroSignupBtn.style.display = '';
-      if (saveOptions) saveOptions.style.display = 'none';
+      if (authButtons) authButtons.style.display = 'flex';
+      if (userMenu) userMenu.style.display = 'none';
     }
     loadSavedEquations();
   }

@@ -11,6 +11,7 @@
     <script src="https://unpkg.com/mathjs@13.0.0/lib/browser/math.js"></script>
     <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
     <script src="https://js.puter.com/v2/"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="styles.css?v=10">
     <link rel="stylesheet" href="tools.css?v=10">
 </head>
@@ -18,7 +19,7 @@
     <!-- Premium Navigation -->
     <nav class="navbar">
         <a href="index.html" class="brand">
-            <div class="brand-icon">∑</div>
+            <div class="brand-icon"><i class="fa-solid fa-atom"></i></div>
             <div class="brand-text">Digi<span>Math</span></div>
         </a>
         <div class="nav-links">
@@ -27,7 +28,8 @@
             <a href="dashboard.html" class="nav-link">Dashboard</a>
         </div>
         <div id="userMenu" class="nav-links">
-            <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
+            <div class="brand-text" id="userNameDisplay" style="font-size:14px; margin-right:20px; color:var(--text-main)">User</div>
+            <button class="btn btn-secondary" onclick="handleLogout()" style="padding: 8px 20px; font-size: 13px;">Logout</button>
         </div>
     </nav>
 
@@ -35,17 +37,17 @@
     <div class="tools-nav">
         <div class="container">
             <div class="tools-tabs">
-                <button class="tool-tab active" data-tool="solver" onclick="switchTool(this)">AI Solver</button>
-                <button class="tool-tab" data-tool="ocr" onclick="switchTool(this)">Image OCR</button>
-                <button class="tool-tab" data-tool="calculator" onclick="switchTool(this)">Calculator</button>
-                <button class="tool-tab" data-tool="thesis" onclick="switchTool(this)">Thesis Writer</button>
-                <button class="tool-tab" data-tool="document" onclick="switchTool(this)">Document AI</button>
-                <button class="tool-tab" data-tool="research" onclick="switchTool(this)">Research</button>
+                <button class="tool-tab active" data-tool="solver" onclick="switchTool(this)"><i class="fa-solid fa-square-root-variable"></i> Solver</button>
+                <button class="tool-tab" data-tool="ocr" onclick="switchTool(this)"><i class="fa-solid fa-camera"></i> OCR</button>
+                <button class="tool-tab" data-tool="calculator" onclick="switchTool(this)"><i class="fa-solid fa-calculator"></i> Calc</button>
+                <button class="tool-tab" data-tool="thesis" onclick="switchTool(this)"><i class="fa-solid fa-file-pen"></i> Thesis</button>
+                <button class="tool-tab" data-tool="document" onclick="switchTool(this)"><i class="fa-solid fa-file-lines"></i> Doc AI</button>
+                <button class="tool-tab" data-tool="research" onclick="switchTool(this)"><i class="fa-solid fa-flask"></i> Research</button>
             </div>
         </div>
     </div>
 
-    <main class="tools-main container">
+    <main class="tools-main container-large">
         <!-- AI SOLVER -->
         <div class="tool-panel active" id="tool-solver">
             <div class="workspace-card">
@@ -58,7 +60,7 @@
                         <div class="field-label">Problem Statement</div>
                         <div class="input-wrapper">
                             <textarea id="solverInput" class="ai-textarea" style="min-height:200px" placeholder="e.g. Solve the differential equation y'' + 4y = sin(2x)..."></textarea>
-                            <button class="inline-mic-btn" onclick="VoiceInput.toggleInline(this, 'solverInput')">🎤</button>
+                            <button class="inline-mic-btn" onclick="VoiceInput.toggleInline(this, 'solverInput')"><i class="fa-solid fa-microphone"></i></button>
                         </div>
                         <div class="field-label">AI Engine</div>
                         <div class="thesis-modes" style="margin-bottom:20px">
@@ -77,7 +79,7 @@
                     <div class="editor-panel">
                         <div class="field-label">AI Solution</div>
                         <div class="ai-output" id="solverOutput">
-                            <div style="color:var(--text-dim)">Solution will appear here...</div>
+                            <div style="color:var(--text-dim)"><i class="fa-solid fa-wand-magic-sparkles"></i> Solution will appear here...</div>
                         </div>
                     </div>
                 </div>
@@ -95,7 +97,7 @@
                     <div class="editor-panel">
                         <div class="field-label">Upload Image</div>
                         <div id="uploadZone" class="preview-window" style="cursor:pointer; flex-direction:column; gap:12px" onclick="document.getElementById('fileInput').click()">
-                            <div style="font-size:32px">📸</div>
+                            <div style="font-size:32px"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                             <p>Click to upload or drag image here</p>
                             <input type="file" id="fileInput" hidden accept="image/*" onchange="handleImageUpload(event)">
                         </div>

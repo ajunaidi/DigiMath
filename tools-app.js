@@ -31,9 +31,13 @@ function switchTool(btn) {
 // ========================
 //  Navbar toggle
 // ========================
-document.getElementById('navToggle').addEventListener('click', () => {
-  document.getElementById('navLinks').classList.toggle('open');
-});
+const navToggle = document.getElementById('navToggle');
+if (navToggle) {
+  navToggle.addEventListener('click', () => {
+    const navLinks = document.getElementById('navLinks');
+    if (navLinks) navLinks.classList.toggle('open');
+  });
+}
 
 // ========================
 //  RESEARCH
@@ -427,12 +431,12 @@ async function searchWiki() {
     if (!res.ok) throw new Error('Topic not found on Wikipedia');
     const data = await res.json();
     out.innerHTML = `
-      <div class="wiki-article-title">📖 ${data.title}</div>
+      <div class="wiki-article-title"><i class="fa-solid fa-book-open"></i> ${data.title}</div>
       <div class="wiki-article-summary">${data.extract}</div>
       <a class="wiki-read-more" href="${data.content_urls?.desktop?.page}" target="_blank">→ Read full article on Wikipedia</a>
       <div style="margin-top:16px">
-        <button class="preset-btn" onclick="askAIAboutWiki('${data.title}','${data.extract.replace(/'/g, "\\'")}')">🤖 Ask AI to explain this deeper</button>
-        <button class="preset-btn" style="margin-left:6px" onclick="askAIAboutWiki('${data.title}','Give MSc-level problems related to ${data.title}')">📝 Get practice problems</button>
+        <button class="preset-btn" onclick="askAIAboutWiki('${data.title}','${data.extract.replace(/'/g, "\\'")}')"><i class="fa-solid fa-robot"></i> Ask AI to explain this deeper</button>
+        <button class="preset-btn" style="margin-left:6px" onclick="askAIAboutWiki('${data.title}','Give MSc-level problems related to ${data.title}')"><i class="fa-solid fa-file-pen"></i> Get practice problems</button>
       </div>
     `;
     showToast('✅ Found: ' + data.title);
