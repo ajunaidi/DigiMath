@@ -8,6 +8,7 @@ let lastSolution = '';
 let lastOCRLatex = '';
 let lastThesisContent = '';
 let currentThesisMode = 'abstract';
+let currentSolverModel = 'gemini-2.0-flash';
 let currentResearchModel = 'gemini-2.0-flash';
 let currentResearchTopic = '';
 let uploadedImageBase64 = '';
@@ -51,6 +52,12 @@ function quickSearch(topic) {
 // ========================
 //  AI SOLVER
 // ========================
+function setSolverModel(btn, model) {
+  currentSolverModel = model;
+  btn.parentElement.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 function setPreset(text) {
   document.getElementById('solverInput').value = text;
 }
@@ -84,22 +91,35 @@ ${explain ? '- Explain the mathematical concepts and theorems used at each step'
 - Format your response with markdown (use ## for headings, **bold** for key terms)
 - For any equation, put the LaTeX in $$...$$ blocks`;
 
-  const useClaude = document.getElementById('optClaude').checked;
-  
+  const btn = document.getElementById('solveBtn');
+  const btnText = document.getElementById('solveBtnText');
+  const output = document.getElementById('solverOutput');
+
+  btn.classList.add('loading');
+  btnText.textContent = '⏳ Thinking...';
+
+  const prompt = `Solve this math problem: ${input}
+Instructions:
+${detailed ? '- Show ALL steps in detail, numbered clearly' : '- Show main steps only'}
+- Use clear headings for each section
+- At the end, provide a clear final answer
+- Format your response with markdown (use ## for headings, **bold** for key terms)
+- For any equation, put the LaTeX in $$...$$ blocks`;
+
   try {
-    let result;
-    if (useClaude) {
-      result = await GeminiAI.claude(prompt);
-    } else {
-      result = await GeminiAI.text(prompt);
-    }
-    
+    const result = await _aiCall({ contents: [{ parts: [{ text: prompt }] }] }, { model: currentSolverModel });
     lastSolution = result;
     output.innerHTML = formatAIResponse(result);
     renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
-    document.getElementById('copySolBtn').style.display = '';
-    document.getElementById('exportSolBtn').style.display = '';
-    showToast('✅ Solution ready!');
+    showToast(`✅ Solved with ${currentSolverModel}`);
+  } catch (err) {
+    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}</div>`;
+    showToast('❌ ' + err.message);
+  }
+
+  btn.classList.remove('loading');
+  btnText.textContent = '🧮 Solve with AI';
+}
   } catch (err) {
     output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}<br><br>Please check your Gemini API key or try again.</div>`;
     showToast('❌ ' + err.message);

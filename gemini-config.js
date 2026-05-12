@@ -6,6 +6,20 @@
 const GEMINI_API_KEY = window.DIGIMATH_CONFIG?.GEMINI_API_KEY || '';
 
 /**
+ * Global UI status helper
+ */
+function showStatus(msg) {
+  const toastEl = document.getElementById('toast');
+  if (toastEl) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(() => toastEl.classList.remove('show'), 3000);
+  } else {
+    console.log('Status:', msg);
+  }
+}
+
+/**
  * Main AI Call function
  */
 async function _aiCall(body, options = {}) {
