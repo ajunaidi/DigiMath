@@ -34,7 +34,7 @@
 <!-- Page Header -->
 <div class="tools-header">
     <div class="container">
-        <div class="tools-header-badge">🤖 Powered by Google Gemini AI</div>
+        <div class="tools-header-badge">🤖 Powered by Gemini AI + Newton API + Math.js + Wikipedia</div>
         <h1 class="tools-header-title">AI Math <span class="gradient-text">Tools Suite</span></h1>
         <p class="tools-header-sub">MSc-level math assistance — solver, OCR, calculator, thesis writer & research</p>
     </div>
@@ -45,6 +45,7 @@
     <div class="container">
         <div class="tools-tabs">
             <button class="tool-tab active" data-tool="solver" onclick="switchTool(this)">🧮 AI Solver</button>
+            <button class="tool-tab" data-tool="quickmath" onclick="switchTool(this)">⚡ Quick Math</button>
             <button class="tool-tab" data-tool="ocr" onclick="switchTool(this)">📷 Image OCR</button>
             <button class="tool-tab" data-tool="calculator" onclick="switchTool(this)">🔢 Calculator</button>
             <button class="tool-tab" data-tool="thesis" onclick="switchTool(this)">📖 Thesis Writer</button>
@@ -345,12 +346,64 @@
         </div>
     </div>
 
+    <!-- ======================== QUICK MATH (Newton API) ======================== -->
+    <div class="tool-panel" id="tool-quickmath">
+        <div class="tool-intro">
+            <div class="tool-intro-icon">⚡</div>
+            <h2>Quick Math — Newton API</h2>
+            <p>Instant symbolic math operations — simplify, factor, derive, integrate, find zeros. Powered by Newton API (100% free, no key needed).</p>
+        </div>
+        <div class="solver-grid">
+            <div class="solver-input-col">
+                <div class="field-label">Enter Expression (use x as variable)</div>
+                <input type="text" id="newtonInput" class="calc-input" style="width:100%;margin-bottom:12px;font-size:16px;padding:14px" placeholder="e.g. x^2 + 2x + 1">
+                <div class="field-label">Choose Operation</div>
+                <div class="preset-grid" style="margin-bottom:12px">
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('simplify')">🔄 Simplify</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('factor')">📐 Factor</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('derive')">📈 Derivative</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('integrate')">∫ Integrate</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('zeroes')">🎯 Find Zeros</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('cos')">cos</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('sin')">sin</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('tan')">tan</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('log')">log</button>
+                    <button class="preset-btn" style="padding:10px 16px;font-size:14px" onclick="runNewton('abs')">|x|</button>
+                </div>
+                <div class="field-label">Quick Examples</div>
+                <div class="preset-grid">
+                    <button class="preset-btn" onclick="document.getElementById('newtonInput').value='x^2+2x+1'">x²+2x+1</button>
+                    <button class="preset-btn" onclick="document.getElementById('newtonInput').value='x^3-6x^2+11x-6'">x³-6x²+11x-6</button>
+                    <button class="preset-btn" onclick="document.getElementById('newtonInput').value='sin(x)*cos(x)'">sin(x)cos(x)</button>
+                    <button class="preset-btn" onclick="document.getElementById('newtonInput').value='e^(2x)'">e^(2x)</button>
+                    <button class="preset-btn" onclick="document.getElementById('newtonInput').value='x^4-1'">x⁴-1</button>
+                </div>
+            </div>
+            <div class="solver-output-col">
+                <div class="output-header"><div class="field-label">Results</div></div>
+                <div class="ai-output" id="newtonOutput" style="min-height:300px">
+                    <div class="output-placeholder">
+                        <div style="font-size:48px;margin-bottom:16px;">⚡</div>
+                        <div>Enter an expression and click an operation</div>
+                        <div style="color:var(--text-dim);font-size:13px;margin-top:8px;">Newton API — instant results, no AI wait time</div>
+                    </div>
+                </div>
+                <div id="newtonLatexPreview" style="display:none;margin-top:12px">
+                    <div class="field-label">Rendered Math</div>
+                    <div class="preview-area" id="newtonMathPreview" style="min-height:60px;font-size:24px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <div class="toast" id="toast"></div>
 
 <script src="supabase-config.js?v=2"></script>
-<script src="gemini-config.js?v=1"></script>
-<script src="tools-app.js?v=1"></script>
+<script src="gemini-config.js?v=3"></script>
+<script src="math-apis.js?v=1"></script>
+<script src="voice-global.js?v=1"></script>
+<script src="tools-app.js?v=2"></script>
 </body>
 </html>
