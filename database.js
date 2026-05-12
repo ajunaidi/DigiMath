@@ -10,9 +10,9 @@ const DB = (() => {
   // ========================
   async function saveEquation(latex, title, category = 'general') {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackSave('equations', { latex, title, category });
+    if (!user || !window.supabaseClient) return fallbackSave('equations', { latex, title, category });
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('equations')
       .insert({
         user_id: user.id,
@@ -29,9 +29,9 @@ const DB = (() => {
 
   async function getEquations() {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackLoad('equations');
+    if (!user || !window.supabaseClient) return fallbackLoad('equations');
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('equations')
       .select('*')
       .eq('user_id', user.id)
@@ -43,9 +43,9 @@ const DB = (() => {
 
   async function deleteEquation(id) {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackDelete('equations', id);
+    if (!user || !window.supabaseClient) return fallbackDelete('equations', id);
 
-    const { error } = await supabase
+    const { error } = await window.supabaseClient
       .from('equations')
       .delete()
       .eq('id', id)
@@ -59,9 +59,9 @@ const DB = (() => {
   // ========================
   async function saveDocument(title, content, equations = []) {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackSave('documents', { title, content, equations });
+    if (!user || !window.supabaseClient) return fallbackSave('documents', { title, content, equations });
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('documents')
       .insert({
         user_id: user.id,
@@ -78,11 +78,11 @@ const DB = (() => {
 
   async function updateDocument(id, updates) {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackUpdate('documents', id, updates);
+    if (!user || !window.supabaseClient) return fallbackUpdate('documents', id, updates);
 
     if (updates.equations) updates.equations = JSON.stringify(updates.equations);
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('documents')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
@@ -96,9 +96,9 @@ const DB = (() => {
 
   async function getDocuments() {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackLoad('documents');
+    if (!user || !window.supabaseClient) return fallbackLoad('documents');
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('documents')
       .select('*')
       .eq('user_id', user.id)
@@ -113,9 +113,9 @@ const DB = (() => {
 
   async function deleteDocument(id) {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackDelete('documents', id);
+    if (!user || !window.supabaseClient) return fallbackDelete('documents', id);
 
-    const { error } = await supabase
+    const { error } = await window.supabaseClient
       .from('documents')
       .delete()
       .eq('id', id)
@@ -129,9 +129,9 @@ const DB = (() => {
   // ========================
   async function saveAssignment(title, subject, dueDate, equations = [], notes = '') {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackSave('assignments', { title, subject, dueDate, equations, notes });
+    if (!user || !window.supabaseClient) return fallbackSave('assignments', { title, subject, dueDate, equations, notes });
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('assignments')
       .insert({
         user_id: user.id,
@@ -151,11 +151,11 @@ const DB = (() => {
 
   async function updateAssignment(id, updates) {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackUpdate('assignments', id, updates);
+    if (!user || !window.supabaseClient) return fallbackUpdate('assignments', id, updates);
 
     if (updates.equations) updates.equations = JSON.stringify(updates.equations);
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('assignments')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
@@ -169,9 +169,9 @@ const DB = (() => {
 
   async function getAssignments() {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackLoad('assignments');
+    if (!user || !window.supabaseClient) return fallbackLoad('assignments');
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('assignments')
       .select('*')
       .eq('user_id', user.id)
@@ -186,9 +186,9 @@ const DB = (() => {
 
   async function deleteAssignment(id) {
     const user = Auth.getUser();
-    if (!user || !supabase) return fallbackDelete('assignments', id);
+    if (!user || !window.supabaseClient) return fallbackDelete('assignments', id);
 
-    const { error } = await supabase
+    const { error } = await window.supabaseClient
       .from('assignments')
       .delete()
       .eq('id', id)
@@ -202,9 +202,9 @@ const DB = (() => {
   // ========================
   async function getProfile() {
     const user = Auth.getUser();
-    if (!user || !supabase) return null;
+    if (!user || !window.supabaseClient) return null;
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
       .from('profiles')
       .select('*')
       .eq('id', user.id)

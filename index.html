@@ -64,11 +64,11 @@
             <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" value="Test@test.com" required>
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" required minlength="6">
+                    <input type="password" id="loginPassword" placeholder="••••••••" value="123456789" required minlength="6">
                 </div>
                 <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
                     <span class="btn-text">Sign In</span>
@@ -95,19 +95,19 @@
             <form class="auth-form" id="signupForm" onsubmit="handleSignup(event)">
                 <div class="form-group">
                     <label for="signupName">Full Name</label>
-                    <input type="text" id="signupName" placeholder="Ahmad Junaidi" required>
+                    <input type="text" id="signupName" placeholder="Ahmad Junaidi" value="Test User" required>
                 </div>
                 <div class="form-group">
                     <label for="signupEmail">Email</label>
-                    <input type="email" id="signupEmail" placeholder="your@email.com" required>
+                    <input type="email" id="signupEmail" placeholder="your@email.com" value="Test@test.com" required>
                 </div>
                 <div class="form-group">
                     <label for="signupPassword">Password</label>
-                    <input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6">
+                    <input type="password" id="signupPassword" placeholder="Min 6 characters" value="123456789" required minlength="6">
                 </div>
                 <div class="form-group">
                     <label for="signupConfirm">Confirm Password</label>
-                    <input type="password" id="signupConfirm" placeholder="Re-enter password" required minlength="6">
+                    <input type="password" id="signupConfirm" placeholder="Re-enter password" value="123456789" required minlength="6">
                 </div>
                 <button type="submit" class="btn btn-primary btn-full" id="signupBtn">
                     <span class="btn-text">Create Account</span>
@@ -159,12 +159,24 @@
             <h2 class="section-title">Powerful <span class="gradient-text">Features</span></h2>
             <p class="section-subtitle">Everything you need to type math equations effortlessly</p>
             <div class="features-grid">
-                <div class="feature-card"><div class="feature-icon">🎤</div><h3>Voice Input</h3><p>Speak equations naturally. Our smart parser understands math terminology.</p></div>
-                <div class="feature-card"><div class="feature-icon">⌨️</div><h3>LaTeX Editor</h3><p>Type LaTeX directly with live preview and quick templates.</p></div>
-                <div class="feature-card"><div class="feature-icon">📄</div><h3>Export to Word</h3><p>Download equations as formatted .docx files for MS Word.</p></div>
-                <div class="feature-card"><div class="feature-icon">📁</div><h3>Documents</h3><p>Organize equations into documents. Save to cloud with Supabase.</p></div>
-                <div class="feature-card"><div class="feature-icon">📝</div><h3>Assignments</h3><p>Track math homework with due dates, subjects, and status.</p></div>
-                <div class="feature-card"><div class="feature-icon">🔐</div><h3>User Accounts</h3><p>Login & signup to sync your work across devices securely.</p></div>
+                <div class="feature-card" style="cursor:pointer;" onclick="document.getElementById('tabVoice').click(); document.getElementById('editor-section').scrollIntoView({behavior: 'smooth'});">
+                    <div class="feature-icon">🎤</div><h3>Voice Input</h3><p>Speak equations naturally. Our smart parser understands math terminology.</p>
+                </div>
+                <div class="feature-card" style="cursor:pointer;" onclick="document.getElementById('tabLatex').click(); document.getElementById('editor-section').scrollIntoView({behavior: 'smooth'});">
+                    <div class="feature-icon">⌨️</div><h3>LaTeX Editor</h3><p>Type LaTeX directly with live preview and quick templates.</p>
+                </div>
+                <div class="feature-card" style="cursor:pointer;" onclick="document.getElementById('editor-section').scrollIntoView({behavior: 'smooth'});">
+                    <div class="feature-icon">📄</div><h3>Export to Word</h3><p>Download equations as formatted .docx files for MS Word.</p>
+                </div>
+                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='dashboard.html'">
+                    <div class="feature-icon">📁</div><h3>Documents</h3><p>Organize equations into documents. Save to cloud with Supabase.</p>
+                </div>
+                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='dashboard.html'">
+                    <div class="feature-icon">📝</div><h3>Assignments</h3><p>Track math homework with due dates, subjects, and status.</p>
+                </div>
+                <div class="feature-card" style="cursor:pointer;" onclick="showModal('signupModal')">
+                    <div class="feature-icon">🔐</div><h3>User Accounts</h3><p>Login & signup to sync your work across devices securely.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -351,10 +363,10 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="supabase-config.js"></script>
-    <script src="auth.js"></script>
-    <script src="database.js"></script>
-    <script src="parser.js"></script>
-    <script src="app.js"></script>
+    <script src="supabase-config.js?v=2"></script>
+    <script src="auth.js?v=2"></script>
+    <script src="database.js?v=2"></script>
+    <script src="parser.js?v=2"></script>
+    <script src="app.js?v=2"></script>
 </body>
 </html>

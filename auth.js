@@ -10,27 +10,27 @@ const Auth = (() => {
   // Listen for auth state changes
   function init(callback) {
     onAuthChangeCallback = callback;
-    if (!supabase) {
+    if (!window.supabaseClient) {
       callback(null);
       return;
     }
 
-    supabase.auth.onAuthStateChange((event, session) => {
+    window.supabaseClient.auth.onAuthStateChange((event, session) => {
       currentUser = session?.user || null;
       if (onAuthChangeCallback) onAuthChangeCallback(currentUser, event);
     });
 
     // Check existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    window.supabaseClient.auth.getSession().then(({ data: { session } }) => {
       currentUser = session?.user || null;
       if (onAuthChangeCallback) onAuthChangeCallback(currentUser, 'INITIAL');
     });
   }
 
   async function signUp(email, password, fullName) {
-    if (!supabase) throw new Error('Supabase not configured');
+    if (!window.supabaseClient) throw new Error('Supabase not configured');
 
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await window.supabaseClient.auth.signUp({
       email,
       password,
       options: {
@@ -42,7 +42,7 @@ const Auth = (() => {
 
     // Create user profile in profiles table
     if (data.user) {
-      await supabase.from('profiles').upsert({
+      await window.supabaseClient.from('profiles').upsert({
         id: data.user.id,
         full_name: fullName,
         email: email,
@@ -54,9 +54,9 @@ const Auth = (() => {
   }
 
   async function signIn(email, password) {
-    if (!supabase) throw new Error('Supabase not configured');
+    if (!window.supabaseClient) throw new Error('Supabase not configured');
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
       email,
       password,
     });
@@ -66,16 +66,16 @@ const Auth = (() => {
   }
 
   async function signOut() {
-    if (!supabase) return;
-    const { error } = await supabase.auth.signOut();
+    if (!window.supabaseClient) return;
+    const { error } = await window.supabaseClient.auth.signOut();
     if (error) throw error;
     currentUser = null;
   }
 
   async function resetPassword(email) {
-    if (!supabase) throw new Error('Supabase not configured');
+    if (!window.supabaseClient) throw new Error('Supabase not configured');
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/index.html',
     });
 
