@@ -334,16 +334,20 @@ function calcStats(type) {
 }
 
 async function explainCalc() {
-  const q = document.getElementById('calcExplainInput').value.trim();
-  if (!q) { showToast('⚠️ Enter a question'); return; }
-  const out = document.getElementById('calcExplainOutput');
-  out.style.display = '';
-  out.innerHTML = '<div class="output-placeholder"><div>⏳ AI is thinking...</div></div>';
+  const q = document.getElementById('calcInput').value.trim();
+  if (!q) { showToast('⚠️ Enter a question or expression'); return; }
+  const out = document.getElementById('calcHistory');
+  const entry = document.createElement('div');
+  entry.className = 'calc-entry';
+  entry.innerHTML = `<div style="font-size:12px;color:var(--accent-primary);margin-bottom:8px">AI Explanation Request...</div>`;
+  out.prepend(entry);
   try {
-    const result = await GeminiAI.text(`You are a math professor. Explain this clearly for an MSc student: "${q}". Use simple language with examples. Include LaTeX ($$...$$) where helpful.`);
-    out.innerHTML = formatAIResponse(result);
-    renderMathInElement(out, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
-  } catch (err) { out.innerHTML = `<div style="color:var(--danger)">❌ ${err.message}</div>`; }
+    const result = await GeminiAI.gemini(`You are a math professor. Explain this clearly for an MSc student: "${q}". Use simple language with examples. Include LaTeX ($$...$$) where helpful.`);
+    entry.innerHTML = `<div style="padding:10px;background:rgba(255,255,255,0.05);border-radius:8px">${formatAIResponse(result)}</div>`;
+    if (window.renderMathInElement) {
+        renderMathInElement(entry, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    }
+  } catch (err) { entry.innerHTML = `<div style="color:var(--danger)">❌ ${err.message}</div>`; }
 }
 
 // ========================
@@ -366,41 +370,64 @@ function setThesisMode(btn, mode) {
 
 async function runThesis() {
   const input = document.getElementById('thesisInput').value.trim();
-  const subject = document.getElementById('thesisSubject').value.trim() || 'Mathematics';
   if (!input) { showToast('⚠️ Please describe your topic'); return; }
 
   const btn = document.getElementById('thesisBtnText');
+  const originalText = btn.textContent;
   btn.textContent = '⏳ Generating...';
 
   const output = document.getElementById('thesisOutput');
   output.innerHTML = '<div class="output-placeholder"><div>⏳ AI is writing...</div></div>';
 
   const prompts = {
-    abstract: `Write a formal academic abstract for an MSc thesis in ${subject}. Topic/Summary: "${input}". The abstract should be 250-300 words, covering: background, objectives, methodology, results, and conclusions. Use formal academic language.`,
-    introduction: `Write a complete Introduction section for an MSc thesis in ${subject}. Topic: "${input}". Include: background context, problem statement, research objectives, significance, and chapter overview. Use academic language. Include relevant equations in LaTeX ($$...$$) where appropriate. Approximately 600-800 words.`,
-    proof: `Write a rigorous mathematical proof for the following theorem/statement in ${subject}: "${input}". Format with: Theorem statement, Proof heading, clear logical steps, and QED. Use LaTeX ($$...$$) for all equations. Show every step clearly.`,
-    conclusion: `Write a formal Conclusion section for an MSc thesis in ${subject}. Research/findings: "${input}". Include: summary of work, key contributions, limitations, and future research directions. Approximately 400-500 words. Academic language.`,
-    improve: `You are an academic editor. Improve the following text for an MSc thesis in ${subject}. Make it more formal, precise, clear, and academically appropriate. Fix grammar. Preserve all mathematical content and LaTeX. Text: "${input}"`,
-    references: `Generate a properly formatted bibliography/references list for an MSc thesis in ${subject}. Topics/authors mentioned: "${input}". Use APA 7th edition format. Include 8-10 relevant, real academic references.`,
+    abstract: `Write a formal academic abstract for an MSc thesis. Topic/Summary: "${input}". The abstract should be 250-300 words, covering: background, objectives, methodology, results, and conclusions. Use formal academic language.`,
+    proof: `Write a rigorous mathematical proof for the following theorem/statement: "${input}". Format with: Theorem statement, Proof heading, clear logical steps, and QED. Use LaTeX ($$...$$) for all equations. Show every step clearly.`,
+    conclusion: `Write a formal Conclusion section for an MSc thesis. Research/findings: "${input}". Include: summary of work, key contributions, limitations, and future research directions. Approximately 400-500 words. Academic language.`,
   };
 
   try {
-    const result = await GeminiAI.text(prompts[currentThesisMode]);
+    const result = await GeminiAI.gemini(prompts[currentThesisMode] || prompts.abstract);
     lastThesisContent = result;
     output.innerHTML = formatAIResponse(result);
-    renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
-    document.getElementById('copyThesisBtn').style.display = '';
-    document.getElementById('exportThesisBtn').style.display = '';
+    if (window.renderMathInElement) {
+        renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    }
+    document.getElementById('copyThesisBtn').style.display = 'block';
+    document.getElementById('exportThesisBtn').style.display = 'block';
     showToast('✅ Content generated!');
   } catch (err) {
     output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ ${err.message}</div>`;
     showToast('❌ ' + err.message);
   }
-  btn.textContent = '📖 Generate with AI';
+  btn.textContent = originalText;
 }
 
 function copyThesis() { navigator.clipboard.writeText(lastThesisContent).then(() => showToast('📋 Copied!')); }
 async function exportThesisWord() { await exportToDocx('Thesis Content', lastThesisContent); }
+
+async function summarizeDoc() {
+  const text = document.getElementById('docInput').value.trim();
+  if (!text) { showToast('⚠️ Please paste some text'); return; }
+  const btn = document.getElementById('docBtnText');
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Summarizing...';
+  const out = document.getElementById('docOutput');
+  out.innerHTML = '<div class="output-placeholder"><div>⏳ AI is reading...</div></div>';
+  try {
+    const result = await GeminiAI.gemini(`Summarize the following academic text/document for an MSc student. Highlight key findings, methodology, and conclusions. Use LaTeX ($$...$$) for any equations. Text: "${text.substring(0, 5000)}"`);
+    lastDocSummary = result;
+    out.innerHTML = formatAIResponse(result);
+    if (window.renderMathInElement) {
+        renderMathInElement(out, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    }
+    document.getElementById('copyDocBtn').style.display = 'block';
+    showToast('✅ Document summarized!');
+  } catch (err) { out.innerHTML = `<div style="color:var(--danger)">❌ ${err.message}</div>`; }
+  btn.textContent = originalText;
+}
+
+let lastDocSummary = '';
+function copyDoc() { navigator.clipboard.writeText(lastDocSummary).then(() => showToast('📋 Copied!')); }
 
 // ========================
 //  RESEARCH (Wikipedia + AI)
@@ -440,10 +467,11 @@ async function askAIAboutWiki(title, context) {
   aiOut.style.display = '';
   aiOut.innerHTML = '<div class="output-placeholder"><div>⏳ AI thinking...</div></div>';
   try {
-    const result = await GeminiAI.text(`You are an expert mathematics professor. Based on the topic "${title}", explain this at MSc level: ${context}. Use LaTeX ($$...$$) for equations. Use markdown formatting.`);
+    const result = await GeminiAI.gemini(`You are an expert MSc-level math research assistant. Use this Wikipedia summary of "${title}" as context: "${context}". Please provide a deep academic explanation or solve the requested problems. Use LaTeX equations ($$...$$).`);
     aiOut.innerHTML = formatAIResponse(result);
-    renderMathInElement(aiOut, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
-    aiOut.scrollIntoView({ behavior: 'smooth' });
+    if (window.renderMathInElement) {
+        renderMathInElement(aiOut, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    }
   } catch (err) { aiOut.innerHTML = `<div style="color:var(--danger)">❌ ${err.message}</div>`; }
 }
 
@@ -456,9 +484,11 @@ async function askResearchAI() {
   aiOut.style.display = '';
   aiOut.innerHTML = '<div class="output-placeholder"><div>⏳ AI thinking...</div></div>';
   try {
-    const result = await GeminiAI.text(`You are an expert MSc-level mathematics research assistant. Answer this thoroughly: "${q}". Include LaTeX equations ($$...$$) and markdown formatting. Be detailed and accurate.`);
+    const result = await GeminiAI.gemini(`You are an expert MSc-level mathematics research assistant. Answer this thoroughly: "${q}". Include LaTeX equations ($$...$$) and markdown formatting. Be detailed and accurate.`);
     aiOut.innerHTML = formatAIResponse(result);
-    renderMathInElement(aiOut, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    if (window.renderMathInElement) {
+        renderMathInElement(aiOut, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    }
   } catch (err) { aiOut.innerHTML = `<div style="color:var(--danger)">❌ ${err.message}</div>`; }
   btn.textContent = '🤖 Ask AI';
 }

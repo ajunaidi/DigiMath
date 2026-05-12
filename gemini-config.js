@@ -24,8 +24,12 @@ function showStatus(msg) {
  */
 async function _aiCall(body, options = {}) {
   const { model = 'gemini-2.0-flash', useDirect = false } = options;
+  
+  // Prefer direct API if key exists and it's a Gemini model
+  const canUseDirect = GEMINI_API_KEY && model.includes('gemini');
+  const shouldPreferDirect = canUseDirect || useDirect;
 
-  if (window.puter && window.puter.ai && !useDirect) {
+  if (window.puter && window.puter.ai && !shouldPreferDirect) {
     try {
       showStatus(`✨ Using Puter (${model})...`);
       const prompt = body.contents[0].parts.find(p => p.text)?.text || '';
@@ -44,14 +48,15 @@ async function _aiCall(body, options = {}) {
       }
       return typeof response === 'string' ? response : response.toString();
     } catch (err) {
-      console.warn('Puter.ai failed, falling back:', err);
+      console.warn('Puter.ai failed or auth required, falling back to direct:', err);
     }
   }
 
-  // Fallback to Direct Google API
-  if (model.includes('gemini') && GEMINI_API_KEY) {
-    showStatus('🔄 Switching to Direct API (Backup)...');
-    const directModel = 'gemini-1.5-flash';
+  // Use Direct Google API
+  if (GEMINI_API_KEY) {
+    showStatus('🚀 Using Direct Gemini API...');
+    // Ensure we use a valid direct model name
+    const directModel = model.includes('2.0') ? 'gemini-2.0-flash' : 'gemini-1.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${directModel}:generateContent?key=${GEMINI_API_KEY}`;
     const res = await fetch(url, {
       method: 'POST',
@@ -59,9 +64,11 @@ async function _aiCall(body, options = {}) {
       body: JSON.stringify(body)
     });
     const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
     return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   }
-  throw new Error('AI Provider unavailable.');
+  
+  throw new Error('AI Provider unavailable. Please check your Gemini API key in config.js or log in to Puter.');
 }
 
 /**
