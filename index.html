@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathVoice — AI Math Voice Typing Tool</title>
-    <meta name="description" content="Speak math equations, save documents & assignments, export to Word.">
+    <title>DigiMath — AI Math Productivity Tool for Students</title>
+    <meta name="description" content="AI-powered math tool: solve equations, upload images, write thesis, export to Word.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -17,8 +17,8 @@
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="nav-brand">
-            <span class="brand-icon">∑</span>
-            <span class="brand-text">Math<span class="brand-accent">Voice</span></span>
+            <span class="brand-icon">Σ</span>
+            <span class="brand-text">Digi<span class="brand-accent">Math</span></span>
         </div>
         <div class="nav-links" id="navLinks">
             <a href="#hero" class="nav-link active">Home</a>
@@ -124,30 +124,25 @@
 
     <!-- Hero Section -->
     <section class="hero" id="hero">
-        <div class="hero-bg-effects">
-            <div class="orb orb-1"></div>
-            <div class="orb orb-2"></div>
-            <div class="orb orb-3"></div>
-            <div class="grid-overlay"></div>
-        </div>
+        <div class="hero-bg-effects"></div>
         <div class="hero-content">
-            <div class="hero-badge">🎤 Voice-Powered Math</div>
-            <h1 class="hero-title">Speak Math.<br><span class="gradient-text">See It Rendered.</span></h1>
-            <p class="hero-subtitle">Voice-to-math typing tool with document management, assignments tracker, and Word export. Save everything to the cloud!</p>
+            <div class="hero-badge">AI-Powered Math Tool for Students</div>
+            <h1 class="hero-title">Your Math<br><span class="gradient-text">Assistant.</span></h1>
+            <p class="hero-subtitle">Solve equations, scan handwritten math, write thesis content, and export to Word — all in one tool built for MSc students.</p>
             <div class="hero-buttons">
-                <a href="#editor-section" class="btn btn-primary btn-glow">
-                    <span class="btn-icon">✏️</span> Start Typing Math
+                <a href="tools.html" class="btn btn-primary btn-glow">
+                    Open AI Tools
                 </a>
-                <button class="btn btn-secondary" onclick="showModal('signupModal')" id="heroSignupBtn">
-                    <span class="btn-icon">🚀</span> Create Free Account
-                </button>
+                <a href="#editor-section" class="btn btn-secondary">
+                    LaTeX Editor
+                </a>
             </div>
             <div class="hero-demo">
                 <div class="demo-card">
-                    <div class="demo-label">🎤 You say:</div>
+                    <div class="demo-label">You say:</div>
                     <div class="demo-speech">"integral of x squared dx from 0 to infinity"</div>
                     <div class="demo-arrow">↓</div>
-                    <div class="demo-label">📐 You get:</div>
+                    <div class="demo-label">You get:</div>
                     <div class="demo-math" id="heroMath"></div>
                 </div>
             </div>
@@ -157,26 +152,26 @@
     <!-- Features Section -->
     <section class="features" id="features">
         <div class="container">
-            <h2 class="section-title">Powerful <span class="gradient-text">Features</span></h2>
-            <p class="section-subtitle">Everything you need to type math equations effortlessly</p>
+            <h2 class="section-title">What <span class="gradient-text">DigiMath</span> Can Do</h2>
+            <p class="section-subtitle">Everything MSc students need for math productivity</p>
             <div class="features-grid">
-                <div class="feature-card" style="cursor:pointer;" onclick="document.getElementById('tabVoice').click(); document.getElementById('editor-section').scrollIntoView({behavior: 'smooth'});">
-                    <div class="feature-icon">🎤</div><h3>Voice Input</h3><p>Speak equations naturally. Our smart parser understands math terminology.</p>
+                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='tools.html'">
+                    <div class="feature-icon">≡</div><h3>AI Math Solver</h3><p>Solve any problem with step-by-step AI explanations.</p>
                 </div>
-                <div class="feature-card" style="cursor:pointer;" onclick="document.getElementById('tabLatex').click(); document.getElementById('editor-section').scrollIntoView({behavior: 'smooth'});">
-                    <div class="feature-icon">⌨️</div><h3>LaTeX Editor</h3><p>Type LaTeX directly with live preview and quick templates.</p>
+                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='tools.html'">
+                    <div class="feature-icon">⧉</div><h3>Image to LaTeX</h3><p>Upload photos of math — get LaTeX code instantly.</p>
                 </div>
-                <div class="feature-card" style="cursor:pointer;" onclick="document.getElementById('editor-section').scrollIntoView({behavior: 'smooth'});">
-                    <div class="feature-icon">📄</div><h3>Export to Word</h3><p>Download equations as formatted .docx files for MS Word.</p>
+                <div class="feature-card" style="cursor:pointer;" onclick="document.getElementById('editor-section').scrollIntoView({behavior:'smooth'})">
+                    <div class="feature-icon">∑</div><h3>LaTeX Editor</h3><p>Type LaTeX with live preview and symbol palette.</p>
                 </div>
-                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='dashboard.html'">
-                    <div class="feature-icon">📁</div><h3>Documents</h3><p>Organize equations into documents. Save to cloud with Supabase.</p>
+                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='tools.html'">
+                    <div class="feature-icon">≣</div><h3>Calculator</h3><p>Advanced calculator with matrices and statistics.</p>
                 </div>
-                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='dashboard.html'">
-                    <div class="feature-icon">📝</div><h3>Assignments</h3><p>Track math homework with due dates, subjects, and status.</p>
+                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='tools.html'">
+                    <div class="feature-icon">≡</div><h3>Thesis Writer</h3><p>AI writes abstracts, proofs, introductions for you.</p>
                 </div>
-                <div class="feature-card" style="cursor:pointer;" onclick="showModal('signupModal')">
-                    <div class="feature-icon">🔐</div><h3>User Accounts</h3><p>Login & signup to sync your work across devices securely.</p>
+                <div class="feature-card" style="cursor:pointer;" onclick="window.location.href='tools.html'">
+                    <div class="feature-icon">◎</div><h3>Research</h3><p>Search Wikipedia and ask AI about any math topic.</p>
                 </div>
             </div>
         </div>
@@ -345,19 +340,20 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <span class="brand-icon">∑</span>
-                    <span class="brand-text">Math<span class="brand-accent">Voice</span></span>
-                    <p class="footer-desc">Voice-powered math typing with cloud storage.</p>
+                    <span class="brand-icon">Σ</span>
+                    <span class="brand-text">Digi<span class="brand-accent">Math</span></span>
+                    <p class="footer-desc">AI-powered math productivity tool for students.</p>
                 </div>
                 <div class="footer-links">
                     <h4>Quick Links</h4>
                     <a href="#hero">Home</a>
+                    <a href="tools.html">AI Tools</a>
                     <a href="#editor-section">Editor</a>
                     <a href="dashboard.html">Dashboard</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 MathVoice. Built with ❤️</p>
+                <p>© 2026 DigiMath. Built for MSc Students.</p>
             </div>
         </div>
     </footer>
@@ -368,7 +364,7 @@
     <script src="auth.js?v=2"></script>
     <script src="database.js?v=2"></script>
     <script src="parser.js?v=2"></script>
-    <script src="voice-global.js?v=1"></script>
+    <script src="voice-global.js?v=2"></script>
     <script src="app.js?v=2"></script>
 </body>
 </html>

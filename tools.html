@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigiMath AI Tools — MSc Math Assistant</title>
+    <title>DigiMath AI Tools — Math Assistant for Students</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -19,14 +19,14 @@
 <!-- Navbar -->
 <nav class="navbar" id="navbar">
     <a href="index.html" class="nav-brand">
-        <span class="brand-icon">∑</span>
+        <span class="brand-icon">Σ</span>
         <span class="brand-text">Digi<span class="brand-accent">Math</span></span>
     </a>
     <div class="nav-links" id="navLinks">
-        <a href="index.html" class="nav-link">🏠 Home</a>
-        <a href="index.html#editor-section" class="nav-link">✏️ Editor</a>
-        <a href="tools.html" class="nav-link active">🤖 AI Tools</a>
-        <a href="dashboard.html" class="nav-link">📊 Dashboard</a>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html#editor-section" class="nav-link">Editor</a>
+        <a href="tools.html" class="nav-link active">AI Tools</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
     </div>
     <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
 </nav>
@@ -44,12 +44,12 @@
 <div class="tools-nav">
     <div class="container">
         <div class="tools-tabs">
-            <button class="tool-tab active" data-tool="solver" onclick="switchTool(this)">🧮 AI Solver</button>
-            <button class="tool-tab" data-tool="quickmath" onclick="switchTool(this)">⚡ Quick Math</button>
-            <button class="tool-tab" data-tool="ocr" onclick="switchTool(this)">📷 Image OCR</button>
-            <button class="tool-tab" data-tool="calculator" onclick="switchTool(this)">🔢 Calculator</button>
-            <button class="tool-tab" data-tool="thesis" onclick="switchTool(this)">📖 Thesis Writer</button>
-            <button class="tool-tab" data-tool="research" onclick="switchTool(this)">🔬 Research</button>
+            <button class="tool-tab active" data-tool="solver" onclick="switchTool(this)">AI Solver</button>
+            <button class="tool-tab" data-tool="quickmath" onclick="switchTool(this)">Quick Math</button>
+            <button class="tool-tab" data-tool="ocr" onclick="switchTool(this)">Image OCR</button>
+            <button class="tool-tab" data-tool="calculator" onclick="switchTool(this)">Calculator</button>
+            <button class="tool-tab" data-tool="thesis" onclick="switchTool(this)">Thesis Writer</button>
+            <button class="tool-tab" data-tool="research" onclick="switchTool(this)">Research</button>
         </div>
     </div>
 </div>
@@ -66,7 +66,10 @@
         <div class="solver-grid">
             <div class="solver-input-col">
                 <div class="field-label">Enter Your Problem</div>
-                <textarea id="solverInput" class="ai-textarea" placeholder="e.g. Solve the differential equation dy/dx = y*sin(x) with initial condition y(0) = 1&#10;&#10;Or: Find eigenvalues of matrix [[2,1],[1,2]]&#10;&#10;Or: Prove that the integral of e^(-x^2) from -inf to inf = sqrt(pi)"></textarea>
+                <div class="input-wrapper">
+                    <textarea id="solverInput" class="ai-textarea" placeholder="e.g. Solve the differential equation dy/dx = y*sin(x) with initial condition y(0) = 1&#10;&#10;Or: Find eigenvalues of matrix [[2,1],[1,2]]&#10;&#10;Or: Prove that the integral of e^(-x^2) from -inf to inf = sqrt(pi)"></textarea>
+                    <button class="inline-mic-btn" title="Click to use voice" onclick="VoiceInput.toggleInline(this, 'solverInput')">🎤</button>
+                </div>
                 <div class="solver-presets">
                     <div class="field-label">Quick Examples:</div>
                     <div class="preset-grid">
@@ -219,7 +222,10 @@
                 <!-- Matrix Calculator -->
                 <div class="calc-section">
                     <div class="field-label">Matrix Calculator</div>
-                    <textarea id="matrixInput" class="ai-textarea" style="min-height:120px;font-family:var(--font-mono)" placeholder="Matrix A (rows separated by ;, values by comma):&#10;e.g.  1,2; 3,4&#10;&#10;Then: det(A)  or  inv(A)  or  eig(A)  or  A*A"></textarea>
+                    <div class="input-wrapper">
+                        <textarea id="matrixInput" class="ai-textarea" style="min-height:120px;font-family:var(--font-mono)" placeholder="Matrix A (rows separated by ;, values by comma):&#10;e.g.  1,2; 3,4&#10;&#10;Then: det(A)  or  inv(A)  or  eig(A)  or  A*A"></textarea>
+                        <button class="inline-mic-btn" title="Click to use voice" onclick="VoiceInput.toggleInline(this, 'matrixInput')">🎤</button>
+                    </div>
                     <div class="calc-input-row" style="margin-top:8px">
                         <input type="text" id="matrixOp" class="calc-input" placeholder="Operation: det(A), inv(A), eig(A), A^2 ...">
                         <button class="btn btn-primary" onclick="calcMatrix()">Run</button>
@@ -273,7 +279,10 @@
                     <button class="mode-btn" onclick="setThesisMode(this,'references')">📚 References</button>
                 </div>
                 <div class="field-label" style="margin-top:16px">Your Topic / Text</div>
-                <textarea id="thesisInput" class="ai-textarea" style="min-height:180px" placeholder="e.g. My thesis is about 'Solving Partial Differential Equations using Fourier Transform methods'. Write an abstract for this thesis."></textarea>
+                <div class="input-wrapper">
+                    <textarea id="thesisInput" class="ai-textarea" style="min-height:180px" placeholder="e.g. My thesis is about 'Solving Partial Differential Equations using Fourier Transform methods'. Write an abstract for this thesis."></textarea>
+                    <button class="inline-mic-btn" title="Click to use voice" onclick="VoiceInput.toggleInline(this, 'thesisInput')">🎤</button>
+                </div>
                 <input type="text" id="thesisSubject" class="calc-input" style="width:100%;margin-top:8px" placeholder="Subject area (e.g. Real Analysis, Topology, Applied Mathematics)">
                 <button class="btn btn-primary btn-full ai-btn" style="margin-top:12px" onclick="runThesis()">
                     <span id="thesisBtnText">📖 Generate with AI</span>
@@ -327,7 +336,10 @@
                 <!-- AI Question about topic -->
                 <div style="margin-top:20px">
                     <div class="field-label">Ask AI about this topic</div>
-                    <textarea id="researchAIInput" class="ai-textarea" style="min-height:100px" placeholder="e.g. Explain the Riemann Hypothesis in simple terms and its implications for prime number theory..."></textarea>
+                    <div class="input-wrapper">
+                        <textarea id="researchAIInput" class="ai-textarea" style="min-height:100px" placeholder="e.g. Explain the Riemann Hypothesis in simple terms and its implications for prime number theory..."></textarea>
+                        <button class="inline-mic-btn" title="Click to use voice" onclick="VoiceInput.toggleInline(this, 'researchAIInput')">🎤</button>
+                    </div>
                     <button class="btn btn-primary btn-full ai-btn" style="margin-top:8px" onclick="askResearchAI()">
                         <span id="researchAIBtnText">🤖 Ask AI</span>
                     </button>
@@ -403,7 +415,7 @@
 <script src="supabase-config.js?v=2"></script>
 <script src="gemini-config.js?v=4"></script>
 <script src="math-apis.js?v=1"></script>
-<script src="voice-global.js?v=1"></script>
+<script src="voice-global.js?v=2"></script>
 <script src="tools-app.js?v=2"></script>
 </body>
 </html>

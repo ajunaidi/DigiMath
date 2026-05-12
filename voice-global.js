@@ -1,40 +1,16 @@
 /**
- * DigiMath — Global Voice Input Component
- * Adds a floating voice button to any page. When activated it
- * fills whichever textarea/input currently has focus.
+ * DigiMath — Integrated Voice Input Component
+ * Handles inline microphone buttons inside textareas
  */
 const VoiceInput = (() => {
   let recognition = null;
   let isListening = false;
   let targetElement = null;
-  let floatingBtn = null;
+  let activeMicBtn = null;
 
   function init() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
-
-    // Create floating mic
-    floatingBtn = document.createElement('button');
-    floatingBtn.id = 'globalMicBtn';
-    floatingBtn.innerHTML = '🎤';
-    floatingBtn.title = 'Voice Input (click any input first)';
-    floatingBtn.style.cssText = `
-      position:fixed; bottom:30px; right:30px; z-index:9998;
-      width:56px; height:56px; border-radius:50%; border:none;
-      background:linear-gradient(135deg,#7c5cfc,#06d6a0); color:white;
-      font-size:24px; cursor:pointer; box-shadow:0 4px 20px rgba(124,92,252,0.4);
-      transition:all 0.3s; display:flex; align-items:center; justify-content:center;
-    `;
-    floatingBtn.addEventListener('click', toggle);
-    document.body.appendChild(floatingBtn);
-
-    // Track which input is focused
-    document.addEventListener('focusin', (e) => {
-      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
-        targetElement = e.target;
-        floatingBtn.title = 'Voice Input → ' + (e.target.placeholder || e.target.id || 'input');
-      }
-    });
 
     recognition = new SR();
     recognition.continuous = true;
@@ -43,47 +19,81 @@ const VoiceInput = (() => {
 
     recognition.onstart = () => {
       isListening = true;
-      floatingBtn.style.background = 'linear-gradient(135deg,#ef4444,#f59e0b)';
-      floatingBtn.style.animation = 'mic-pulse 1.5s ease infinite';
-      floatingBtn.innerHTML = '⏹️';
+      if (activeMicBtn) {
+        activeMicBtn.classList.add('listening');
+        activeMicBtn.innerHTML = '⏹️';
+      }
       showVoiceToast('🎤 Listening... Speak now');
     };
+
     recognition.onend = () => {
       isListening = false;
-      floatingBtn.style.background = 'linear-gradient(135deg,#7c5cfc,#06d6a0)';
-      floatingBtn.style.animation = '';
-      floatingBtn.innerHTML = '🎤';
+      if (activeMicBtn) {
+        activeMicBtn.classList.remove('listening');
+        activeMicBtn.innerHTML = '🎤';
+      }
+      activeMicBtn = null;
+      targetElement = null;
     };
+
     recognition.onerror = (e) => {
       isListening = false;
-      floatingBtn.style.background = 'linear-gradient(135deg,#7c5cfc,#06d6a0)';
-      floatingBtn.style.animation = '';
-      floatingBtn.innerHTML = '🎤';
+      if (activeMicBtn) {
+        activeMicBtn.classList.remove('listening');
+        activeMicBtn.innerHTML = '🎤';
+      }
       if (e.error === 'not-allowed') showVoiceToast('⚠️ Microphone access denied');
     };
+
     recognition.onresult = (event) => {
       let finalT = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) finalT += event.results[i][0].transcript;
       }
       if (finalT && targetElement) {
-        targetElement.value += (targetElement.value ? ' ' : '') + finalT;
+        // Add space if there is already text
+        targetElement.value += (targetElement.value && !targetElement.value.endsWith(' ') ? ' ' : '') + finalT;
+        // Trigger input event to update any listeners
         targetElement.dispatchEvent(new Event('input', { bubbles: true }));
         showVoiceToast('✅ Text added: "' + finalT.substring(0, 40) + '..."');
       }
     };
   }
 
-  function toggle() {
-    if (!recognition) return;
+  function toggleInline(btnElement, targetInputId) {
+    if (!recognition) {
+      showVoiceToast('⚠️ Speech recognition not supported in this browser.');
+      return;
+    }
+    
+    // If we are currently listening on THIS button, stop it
+    if (isListening && activeMicBtn === btnElement) {
+      recognition.stop();
+      return;
+    }
+    
+    // If listening on another button, stop it first
     if (isListening) {
       recognition.stop();
-    } else {
-      if (!targetElement) {
-        const first = document.querySelector('textarea, input[type="text"]');
-        if (first) { targetElement = first; first.focus(); }
-      }
+      // wait a bit before starting new one
+      setTimeout(() => startListening(btnElement, targetInputId), 300);
+      return;
+    }
+
+    startListening(btnElement, targetInputId);
+  }
+
+  function startListening(btnElement, targetInputId) {
+    targetElement = document.getElementById(targetInputId);
+    if (!targetElement) return;
+    
+    activeMicBtn = btnElement;
+    targetElement.focus();
+    
+    try {
       recognition.start();
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -95,11 +105,10 @@ const VoiceInput = (() => {
       toast = document.createElement('div');
       toast.id = 'voiceToast';
       toast.style.cssText = `
-        position:fixed; bottom:100px; right:30px; z-index:9999;
-        padding:10px 20px; border-radius:10px; background:rgba(18,18,42,0.95);
-        border:1px solid rgba(124,92,252,0.3); color:#eee; font-size:13px;
-        font-family:Inter,sans-serif; box-shadow:0 8px 32px rgba(0,0,0,0.4);
-        transition:opacity 0.3s; opacity:0;
+        position:fixed; bottom:30px; left:50%; transform:translateX(-50%); z-index:9999;
+        padding:10px 24px; border-radius:8px; background:#1e293b;
+        color:white; font-size:14px; font-family:Inter,sans-serif;
+        box-shadow:0 4px 12px rgba(0,0,0,0.15); transition:opacity 0.3s; opacity:0; pointer-events:none;
       `;
       document.body.appendChild(toast);
     }
@@ -115,5 +124,5 @@ const VoiceInput = (() => {
     init();
   }
 
-  return { toggle, isListening: () => isListening };
+  return { toggleInline, isListening: () => isListening };
 })();
