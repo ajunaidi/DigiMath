@@ -2,7 +2,10 @@
  * MathVoice — Dashboard Application Logic
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Enforce Login
+  await Auth.requireLogin();
+
   // Init Supabase
   const supaReady = initSupabase();
 

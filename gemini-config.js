@@ -1,98 +1,84 @@
 /**
- * DigiMath — Google Gemini AI Configuration
- * Handles model switching and auto-fallback between 1.5-flash and 2.0-flash
+ * DigiMath — Multi-Model AI Configuration
+ * Using Puter.js for Unlimited Access to Gemini, Claude, DeepSeek, Amazon Nova & more.
  */
 
-// API Key is loaded from config.js (which is git-ignored for security)
 const GEMINI_API_KEY = window.DIGIMATH_CONFIG?.GEMINI_API_KEY || '';
 
-// Current active model (starts with 1.5-flash as it is more stable for free tier quota)
-let activeModel = 'gemini-1.5-flash'; 
-
 /**
- * Call Gemini with auto-retry and model fallback
+ * Main AI Call function
  */
-async function _geminiCall(body, retries = 2) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${GEMINI_API_KEY}`;
-  
-  try {
+async function _aiCall(body, options = {}) {
+  const { model = 'gemini-2.0-flash', useDirect = false } = options;
+
+  if (window.puter && window.puter.ai && !useDirect) {
+    try {
+      showStatus(`✨ Using Puter (${model})...`);
+      const prompt = body.contents[0].parts.find(p => p.text)?.text || '';
+      const imagePart = body.contents[0].parts.find(p => p.inline_data);
+      
+      let response;
+      if (imagePart) {
+        const imageData = `data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`;
+        response = await puter.ai.chat(prompt, imageData, { model: model });
+      } else {
+        response = await puter.ai.chat(prompt, { model: model });
+      }
+      
+      if (typeof response === 'object' && response.message && response.message.content) {
+          return response.message.content[0].text;
+      }
+      return typeof response === 'string' ? response : response.toString();
+    } catch (err) {
+      console.warn('Puter.ai failed, falling back:', err);
+    }
+  }
+
+  // Fallback to Direct Google API
+  if (model.includes('gemini') && GEMINI_API_KEY) {
+    showStatus('🔄 Switching to Direct API (Backup)...');
+    const directModel = 'gemini-1.5-flash';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${directModel}:generateContent?key=${GEMINI_API_KEY}`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-
-    // Handle Rate Limit (429)
-    if (res.status === 429 && retries > 0) {
-      const waitSec = 20;
-      showStatus(`⏳ Rate limit hit. Waiting ${waitSec}s to retry...`);
-      await new Promise(r => setTimeout(r, waitSec * 1000));
-      return _geminiCall(body, retries - 1);
-    }
-
-    // Handle Quota/Model errors (often 400 or 403)
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      const errMsg = errData.error?.message || '';
-      
-      // If quota exceeded or model not found, try falling back to the other model
-      if ((errMsg.includes('quota') || errMsg.includes('not found') || errMsg.includes('not supported')) && activeModel === 'gemini-1.5-flash') {
-        showStatus('🔄 Switching to Gemini 2.0 Flash...');
-        activeModel = 'gemini-2.0-flash';
-        return _geminiCall(body, retries);
-      } else if ((errMsg.includes('quota') || errMsg.includes('not found')) && activeModel === 'gemini-2.0-flash') {
-        showStatus('🔄 Switching to Gemini 1.5 Flash...');
-        activeModel = 'gemini-1.5-flash';
-        return _geminiCall(body, retries);
-      }
-
-      throw new Error(errMsg || `API Error (${res.status})`);
-    }
-
     const data = await res.json();
     return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-  } catch (err) {
-    if (retries > 0 && err.message.includes('fetch')) {
-      await new Promise(r => setTimeout(r, 2000));
-      return _geminiCall(body, retries - 1);
-    }
-    throw err;
   }
-}
-
-function showStatus(msg) {
-  const toastEl = document.getElementById('toast');
-  if (toastEl) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    setTimeout(() => toastEl.classList.remove('show'), 4000);
-  }
+  throw new Error('AI Provider unavailable.');
 }
 
 /**
- * Call Gemini API with text prompt
+ * Puter Specific APIs (Summarization & Sentiment)
  */
-async function geminiText(prompt) {
-  return _geminiCall({
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 4096 }
-  });
+async function aiSummarize(text) {
+  if (!window.puter) throw new Error('Puter.js not loaded');
+  showStatus('📄 Summarizing document...');
+  const response = await puter.ai.summarize(text);
+  return response;
+}
+
+async function aiAnalyzeSentiment(text) {
+  if (!window.puter) throw new Error('Puter.js not loaded');
+  showStatus('🔍 Analyzing sentiment...');
+  const response = await puter.ai.analyzeSentiment(text);
+  return response;
 }
 
 /**
- * Call Gemini API with image (base64) + text prompt
+ * Model Specific Wrappers
  */
-async function geminiVision(base64Image, mimeType, prompt) {
-  return _geminiCall({
-    contents: [{
-      parts: [
-        { inline_data: { mime_type: mimeType, data: base64Image } },
-        { text: prompt }
-      ]
-    }],
-    generationConfig: { temperature: 0.1, maxOutputTokens: 4096 }
-  });
-}
+const AI = {
+  gemini: (prompt) => _aiCall({ contents: [{ parts: [{ text: prompt }] }] }, { model: 'gemini-2.0-flash' }),
+  vision: (base64, mime, prompt) => _aiCall({ contents: [{ parts: [{ inline_data: { mime_type: mime, data: base64 } }, { text: prompt }] }] }, { model: 'gemini-2.0-flash' }),
+  claude: (prompt) => _aiCall({ contents: [{ parts: [{ text: prompt }] }] }, { model: 'claude-opus-4-7' }),
+  deepseek: (prompt) => _aiCall({ contents: [{ parts: [{ text: prompt }] }] }, { model: 'deepseek-v3' }),
+  nova: (prompt) => _aiCall({ contents: [{ parts: [{ text: prompt }] }] }, { model: 'amazon-nova-pro-v1' }),
+  summarize: aiSummarize,
+  sentiment: aiAnalyzeSentiment
+};
 
-window.GeminiAI = { text: geminiText, vision: geminiVision };
+window.GeminiAI = AI; // Keep legacy name for compatibility
+window.DigiMathAI = AI;

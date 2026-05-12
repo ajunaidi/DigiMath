@@ -8,11 +8,16 @@ let lastSolution = '';
 let lastOCRLatex = '';
 let lastThesisContent = '';
 let currentThesisMode = 'abstract';
+let currentResearchModel = 'gemini-2.0-flash';
+let currentResearchTopic = '';
 let uploadedImageBase64 = '';
 let uploadedImageMime = '';
 
+// Enforce Login for Tools
+Auth.requireLogin();
+
 // ========================
-//  Tab Switching
+//  State Management
 // ========================
 function switchTool(btn) {
   document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
@@ -28,6 +33,20 @@ function switchTool(btn) {
 document.getElementById('navToggle').addEventListener('click', () => {
   document.getElementById('navLinks').classList.toggle('open');
 });
+
+// ========================
+//  RESEARCH
+// ========================
+function setResearchModel(btn, model) {
+  currentResearchModel = model;
+  btn.parentElement.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function quickSearch(topic) {
+  document.getElementById('wikiQuery').value = topic;
+  searchWiki();
+}
 
 // ========================
 //  AI SOLVER
@@ -65,8 +84,16 @@ ${explain ? '- Explain the mathematical concepts and theorems used at each step'
 - Format your response with markdown (use ## for headings, **bold** for key terms)
 - For any equation, put the LaTeX in $$...$$ blocks`;
 
+  const useClaude = document.getElementById('optClaude').checked;
+  
   try {
-    const result = await GeminiAI.text(prompt);
+    let result;
+    if (useClaude) {
+      result = await GeminiAI.claude(prompt);
+    } else {
+      result = await GeminiAI.text(prompt);
+    }
+    
     lastSolution = result;
     output.innerHTML = formatAIResponse(result);
     renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });

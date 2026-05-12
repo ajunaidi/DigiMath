@@ -90,5 +90,21 @@ const Auth = (() => {
     return currentUser !== null;
   }
 
-  return { init, signUp, signIn, signOut, resetPassword, getUser, isLoggedIn };
+  // Promise that resolves when session is checked
+  async function checkSession() {
+    if (currentUser) return currentUser;
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    currentUser = session?.user || null;
+    return currentUser;
+  }
+
+  async function requireLogin() {
+    const user = await checkSession();
+    if (!user) {
+      window.location.href = 'index.html?login=required';
+    }
+    return user;
+  }
+
+  return { init, signUp, signIn, signOut, resetPassword, getUser, isLoggedIn, requireLogin, checkSession };
 })();

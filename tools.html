@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="https://unpkg.com/mathjs@13.0.0/lib/browser/math.js"></script>
     <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="tools.css">
 </head>
@@ -49,6 +50,7 @@
             <button class="tool-tab" data-tool="ocr" onclick="switchTool(this)">Image OCR</button>
             <button class="tool-tab" data-tool="calculator" onclick="switchTool(this)">Calculator</button>
             <button class="tool-tab" data-tool="thesis" onclick="switchTool(this)">Thesis Writer</button>
+            <button class="tool-tab" data-tool="document" onclick="switchTool(this)">Document AI</button>
             <button class="tool-tab" data-tool="research" onclick="switchTool(this)">Research</button>
         </div>
     </div>
@@ -93,6 +95,10 @@
                     <label class="option-check">
                         <input type="checkbox" id="optExplain" checked>
                         <span>Explain concepts</span>
+                    </label>
+                    <label class="option-check" title="Use Claude Opus 4.7 for top-tier complex reasoning">
+                        <input type="checkbox" id="optClaude">
+                        <span style="color:var(--accent);font-weight:600">Complex Reasoning (Claude Opus 4.7)</span>
                     </label>
                 </div>
                 <button class="btn btn-primary btn-full ai-btn" id="solveBtn" onclick="solveMath()">
@@ -306,7 +312,40 @@
         </div>
     </div>
 
-    <!-- ======================== RESEARCH ======================== -->
+    <!-- ======================== DOCUMENT AI ======================== -->
+    <div class="tool-panel" id="tool-document">
+        <div class="tool-intro">
+            <div class="tool-intro-icon">📄</div>
+            <h2>Document AI</h2>
+            <p>Analyze your thesis drafts or research papers. Summarize long texts or check the sentiment/tone of your writing.</p>
+        </div>
+        <div class="research-grid">
+            <div class="research-input-col">
+                <div class="field-label">Paste Text to Analyze</div>
+                <div class="input-wrapper">
+                    <textarea id="docAIInput" class="ai-textarea" style="min-height:250px" placeholder="Paste your research paper, abstract, or chapter here..."></textarea>
+                    <button class="inline-mic-btn" title="Click to use voice" onclick="VoiceInput.toggleInline(this, 'docAIInput')">🎤</button>
+                </div>
+                <div class="calc-input-row" style="margin-top:12px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <button class="btn btn-primary" onclick="runDocSummarize()">Summarize Text</button>
+                    <button class="btn btn-secondary" onclick="runDocSentiment()">Analyze Tone</button>
+                </div>
+            </div>
+            <div class="research-output-col">
+                <div class="output-header">
+                    <div class="field-label">Analysis Result</div>
+                    <div class="output-actions">
+                        <button class="action-btn" onclick="copyToClipboard('docAIOutput')">📋 Copy</button>
+                    </div>
+                </div>
+                <div class="ai-output" id="docAIOutput">
+                    <div class="output-placeholder">
+                        📄 Analysis will appear here...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="tool-panel" id="tool-research">
         <div class="tool-intro">
             <div class="tool-intro-icon">🔬</div>
@@ -325,23 +364,27 @@
                     <div class="preset-grid">
                         <button class="preset-btn" onclick="quickSearch('Riemann hypothesis')">Riemann Hypothesis</button>
                         <button class="preset-btn" onclick="quickSearch('Fourier transform')">Fourier Transform</button>
-                        <button class="preset-btn" onclick="quickSearch('Linear algebra')">Linear Algebra</button>
-                        <button class="preset-btn" onclick="quickSearch('Differential equation')">Differential Equations</button>
-                        <button class="preset-btn" onclick="quickSearch('Complex analysis')">Complex Analysis</button>
-                        <button class="preset-btn" onclick="quickSearch('Topology mathematics')">Topology</button>
-                        <button class="preset-btn" onclick="quickSearch('Number theory')">Number Theory</button>
-                        <button class="preset-btn" onclick="quickSearch('Stochastic process')">Stochastic Processes</button>
-                    </div>
+                    <input type="text" id="wikiQuery" class="calc-input" placeholder="e.g. Riemann Hypothesis, Quantum Field Theory...">
+                    <button class="btn btn-secondary" onclick="searchWiki()">Search Wiki</button>
                 </div>
-                <!-- AI Question about topic -->
-                <div style="margin-top:20px">
+                
+                <!-- Model Choice for Research -->
+                <div class="field-label" style="margin-top:20px">AI Assistant Model</div>
+                <div class="thesis-modes">
+                    <button class="mode-btn active" onclick="setResearchModel(this,'gemini-2.0-flash')">Gemini 2.0</button>
+                    <button class="mode-btn" onclick="setResearchModel(this,'claude-opus-4-7')">Claude 4.7</button>
+                    <button class="mode-btn" onclick="setResearchModel(this,'deepseek-v3')">DeepSeek V3</button>
+                    <button class="mode-btn" onclick="setResearchModel(this,'amazon-nova-pro-v1')">Amazon Nova</button>
+                </div>
+
+                <div style="margin-top:12px">
                     <div class="field-label">Ask AI about this topic</div>
                     <div class="input-wrapper">
                         <textarea id="researchAIInput" class="ai-textarea" style="min-height:100px" placeholder="e.g. Explain the Riemann Hypothesis in simple terms and its implications for prime number theory..."></textarea>
                         <button class="inline-mic-btn" title="Click to use voice" onclick="VoiceInput.toggleInline(this, 'researchAIInput')">🎤</button>
                     </div>
                     <button class="btn btn-primary btn-full ai-btn" style="margin-top:8px" onclick="askResearchAI()">
-                        <span id="researchAIBtnText">🤖 Ask AI</span>
+                        <span id="researchAIBtnText">🤖 Ask AI Assistant</span>
                     </button>
                 </div>
             </div>
@@ -414,7 +457,7 @@
 
 <script src="config.js?v=1"></script>
 <script src="supabase-config.js?v=2"></script>
-<script src="gemini-config.js?v=5"></script>
+<script src="gemini-config.js?v=7"></script>
 <script src="math-apis.js?v=1"></script>
 <script src="voice-global.js?v=2"></script>
 <script src="tools-app.js?v=2"></script>

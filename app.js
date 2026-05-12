@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================
   const supaReady = initSupabase();
 
+  // Check for login required redirect
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('login') === 'required') {
+    setTimeout(() => showToast('🔐 Please login to access AI Tools and your data'), 500);
+    // Open signup modal automatically
+    setTimeout(() => showModal('signupModal'), 1000);
+  }
+
   // ========================
   //  DOM References
   // ========================
