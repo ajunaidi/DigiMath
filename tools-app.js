@@ -70,6 +70,34 @@ async function solveMath() {
   const problem = document.getElementById('solverInput').value.trim();
   if (!problem) { showToast('⚠️ Please enter a math problem'); return; }
 
+  const output = document.getElementById('solverOutput');
+
+  // STEP 1: Check Local Knowledge Directory (Soft Solution)
+  const localSolution = window.MathDirectory ? window.MathDirectory.find(problem) : null;
+  if (localSolution) {
+    showToast('✨ Instant Soft Solution Found!');
+    output.innerHTML = `
+      <div style="background:var(--accent-glow); padding:16px; border-radius:12px; border:1px solid var(--accent-primary); margin-bottom:16px">
+        <div style="font-weight:bold; color:var(--accent-secondary); margin-bottom:8px"><i class="fa-solid fa-bolt"></i> Local Knowledge Match</div>
+        ${formatAIResponse(localSolution)}
+      </div>
+      <div style="text-align:center; margin-top:20px">
+        <p style="font-size:13px; color:var(--text-dim); margin-bottom:12px">Not satisfied? Get a deeper PhD-level analysis:</p>
+        <button class="btn btn-secondary" onclick="solveMathCloud()" style="padding:8px 20px; font-size:13px">🧠 Solve with Cloud AI</button>
+      </div>
+    `;
+    if (window.renderMathInElement) {
+        renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    }
+    return;
+  }
+
+  // STEP 2: Proceed to Cloud AI
+  solveMathCloud();
+}
+
+async function solveMathCloud() {
+  const problem = document.getElementById('solverInput').value.trim();
   const detailed = document.getElementById('optDetailed').checked;
   const latex = document.getElementById('optLatex').checked;
   const explain = document.getElementById('optExplain').checked;
@@ -83,34 +111,23 @@ async function solveMath() {
   output.innerHTML = '<div class="output-placeholder"><div style="font-size:32px">⏳</div><div>AI is solving your problem...</div></div>';
 
   const prompt = `You are an expert MSc/PhD-level mathematics professor. Solve the following problem completely.
-
 Problem: ${problem}
-
 Instructions:
 ${detailed ? '- Show ALL steps in detail, numbered clearly' : '- Show main steps only'}
 ${latex ? '- Include LaTeX code for every equation using $...$ for inline and $$...$$ for display' : ''}
 ${explain ? '- Explain the mathematical concepts and theorems used at each step' : ''}
-- Use clear headings for each section
-- At the end, provide a clear final answer
-- Format your response with markdown (use ## for headings, **bold** for key terms)
-- For any equation, put the LaTeX in $$...$$ blocks`;
+- Format with markdown and LaTeX ($$...$$).`;
 
   try {
     const result = await _aiCall({ contents: [{ parts: [{ text: prompt }] }] }, { model: currentSolverModel });
     lastSolution = result;
     output.innerHTML = formatAIResponse(result);
     if (window.renderMathInElement) {
-        renderMathInElement(output, { 
-            delimiters: [
-                { left: '$$', right: '$$', display: true }, 
-                { left: '$', right: '$', display: false }
-            ], 
-            throwOnError: false 
-        });
+        renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
     }
     showToast(`✅ Solved with ${currentSolverModel}`);
   } catch (err) {
-    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}<br><br>Please check your connection or try again.</div>`;
+    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}</div>`;
     showToast('❌ ' + err.message);
   }
 
@@ -175,45 +192,72 @@ function clearImage() {
 async function runOCR() {
   if (!uploadedImageBase64) { showToast('⚠️ Please upload an image first'); return; }
 
+  const btn = document.getElementById('ocrBtn');
+  const btnText = document.getElementById('ocrBtnText');
+  const output = document.getElementById('ocrOutput');
+
+  btn.classList.add('loading');
+  btnText.textContent = '⏳ Local Tracing...';
+  output.innerHTML = '<div class="output-placeholder"><div style="font-size:32px">🔍</div><div>Tracing image locally...</div></div>';
+
+  try {
+    // STEP 1: Attempt Local OCR (Tesseract.js)
+    const tesseractResult = await Tesseract.recognize(`data:${uploadedImageMime};base64,${uploadedImageBase64}`, 'eng');
+    const text = tesseractResult.data.text.trim();
+
+    // STEP 2: Check Local Knowledge Directory
+    const localMatch = window.MathDirectory ? window.MathDirectory.find(text) : null;
+    if (localMatch) {
+      showToast('✨ Local Match Found!');
+      output.innerHTML = `
+        <div style="background:var(--accent-glow); padding:16px; border-radius:12px; border:1px solid var(--accent-primary); margin-bottom:16px">
+          <div style="font-weight:bold; color:var(--accent-secondary); margin-bottom:8px"><i class="fa-solid fa-bolt"></i> Local Knowledge Match</div>
+          ${formatAIResponse(localMatch)}
+        </div>
+        <div style="text-align:center; margin-top:20px">
+          <button class="btn btn-secondary" onclick="runOCRCloud()" style="padding:8px 20px; font-size:13px">🧠 Deep AI Extract</button>
+        </div>
+      `;
+      if (window.renderMathInElement) {
+          renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+      }
+      btn.classList.remove('loading');
+      btnText.textContent = '📷 Extract Math from Image';
+      return;
+    }
+    runOCRCloud();
+  } catch (err) {
+    runOCRCloud();
+  }
+}
+
+async function runOCRCloud() {
   const mode = document.querySelector('input[name="ocrMode"]:checked').value;
   const btn = document.getElementById('ocrBtn');
   const btnText = document.getElementById('ocrBtnText');
-  btn.classList.add('loading');
-  btnText.textContent = '⏳ Processing image...';
-
   const output = document.getElementById('ocrOutput');
-  output.innerHTML = '<div class="output-placeholder"><div style="font-size:32px">⏳</div><div>AI is reading your image...</div></div>';
+
+  btn.classList.add('loading');
+  btnText.textContent = '⏳ AI Vision...';
+  output.innerHTML = '<div class="output-placeholder"><div style="font-size:32px">☁️</div><div>Using Cloud AI...</div></div>';
 
   let prompt = '';
   if (mode === 'latex') {
-    prompt = `You are a LaTeX OCR expert. Look at this image carefully and extract all mathematical equations and content.
-
-Output ONLY the LaTeX code (no explanations). For each equation, use display math: $$...$$
-If there are multiple equations, separate them clearly.
-If there's text too, include it normally but equations must be in LaTeX.`;
+    prompt = `Extract all mathematical equations from this image and convert them to LaTeX. Use $$...$$ for every equation. Output ONLY LaTeX.`;
   } else if (mode === 'solve') {
-    prompt = `You are an expert math professor. Look at this image which contains a math problem.
-1. First extract the problem in LaTeX (in $$...$$ blocks)
-2. Then solve it completely with step-by-step solution
-3. Show all work and provide a clear final answer
-Format with markdown headings.`;
+    prompt = `You are an expert math professor. Extract the problem from this image and solve it step-by-step. Use LaTeX ($$...$$).`;
   } else {
-    prompt = `You are an expert math teacher. Look at this image which contains a math problem or equation.
-1. First extract all math in LaTeX format (using $$...$$ blocks)
-2. Explain what this problem/equation is about
-3. Explain each component step by step
-4. If it's a problem, show how to approach and solve it
-5. Mention any important theorems or concepts used
-Format with markdown headings and clear structure.`;
+    prompt = `Analyze this math image. Extract equations in LaTeX ($$...$$) and explain them thoroughly.`;
   }
 
   try {
     const result = await GeminiAI.vision(uploadedImageBase64, uploadedImageMime, prompt);
     lastOCRLatex = result;
     output.innerHTML = formatAIResponse(result);
-    renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
-
-    // Extract first LaTeX block for preview
+    if (window.renderMathInElement) {
+        renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    }
+    
     const latexMatch = result.match(/\$\$([\s\S]+?)\$\$/);
     if (latexMatch) {
       const previewEl = document.getElementById('ocrMathPreview');
@@ -221,15 +265,13 @@ Format with markdown headings and clear structure.`;
       try { katex.render(latexMatch[1].trim(), previewEl, { displayMode: true, throwOnError: false }); } catch(e) {}
     }
 
-    document.getElementById('copyOcrBtn').style.display = '';
-    document.getElementById('loadEditorBtn').style.display = '';
-    document.getElementById('exportOcrBtn').style.display = '';
-    showToast('✅ Math extracted from image!');
+    document.getElementById('copyOcrBtn').style.display = 'block';
+    document.getElementById('loadEditorBtn').style.display = 'block';
+    document.getElementById('exportOcrBtn').style.display = 'block';
+    showToast('✅ AI extraction complete!');
   } catch (err) {
-    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}</div>`;
-    showToast('❌ ' + err.message);
+    output.innerHTML = `<div style="color:var(--danger)">❌ ${err.message}</div>`;
   }
-
   btn.classList.remove('loading');
   btnText.textContent = '📷 Extract Math from Image';
 }
