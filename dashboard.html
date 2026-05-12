@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — MathVoice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="nav-brand" style="text-decoration:none">
+            <span class="brand-icon">∑</span>
+            <span class="brand-text">Math<span class="brand-accent">Voice</span></span>
+        </a>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="index.html#editor-section" class="nav-link">Editor</a>
+            <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        </div>
+        <div class="nav-auth">
+            <div id="userMenu">
+                <div class="user-badge" id="userBadge" onclick="toggleUserDropdown()">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span class="user-name" id="userName">User</span>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="index.html#editor-section" class="dropdown-item">✏️ Editor</a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" onclick="handleLogout()">🚪 Logout</button>
+                </div>
+            </div>
+        </div>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <main class="dashboard" id="dashboardMain">
+        <!-- Welcome Banner -->
+        <div class="dash-welcome">
+            <div class="container">
+                <h1>Welcome back, <span class="gradient-text" id="dashUserName">User</span>!</h1>
+                <p>Manage your math works, documents, and assignments</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Stats Cards -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">📐</div>
+                    <div class="stat-value" id="statEquations">0</div>
+                    <div class="stat-label">Equations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📄</div>
+                    <div class="stat-value" id="statDocuments">0</div>
+                    <div class="stat-label">Documents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-value" id="statAssignments">0</div>
+                    <div class="stat-label">Assignments</div>
+                </div>
+                <div class="stat-card stat-accent">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value" id="statPending">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="dash-tabs">
+                <button class="dash-tab active" data-section="equations" onclick="switchDashTab(this)">📐 Equations</button>
+                <button class="dash-tab" data-section="documents" onclick="switchDashTab(this)">📄 Documents</button>
+                <button class="dash-tab" data-section="assignments" onclick="switchDashTab(this)">📝 Assignments</button>
+            </div>
+
+            <!-- Equations Section -->
+            <div class="dash-section active" id="sectionEquations">
+                <div class="section-toolbar">
+                    <h2>📐 My Equations</h2>
+                    <a href="index.html#editor-section" class="btn btn-primary btn-sm">+ New Equation</a>
+                </div>
+                <div class="items-grid" id="equationsGrid">
+                    <div class="empty-state">Loading equations...</div>
+                </div>
+            </div>
+
+            <!-- Documents Section -->
+            <div class="dash-section" id="sectionDocuments">
+                <div class="section-toolbar">
+                    <h2>📄 My Documents</h2>
+                    <button class="btn btn-primary btn-sm" onclick="showNewDocModal()">+ New Document</button>
+                </div>
+                <div class="items-grid" id="documentsGrid">
+                    <div class="empty-state">Loading documents...</div>
+                </div>
+            </div>
+
+            <!-- Assignments Section -->
+            <div class="dash-section" id="sectionAssignments">
+                <div class="section-toolbar">
+                    <h2>📝 My Assignments</h2>
+                    <button class="btn btn-primary btn-sm" onclick="showNewAssignmentModal()">+ New Assignment</button>
+                </div>
+                <div class="items-grid" id="assignmentsGrid">
+                    <div class="empty-state">Loading assignments...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Not Logged In State -->
+    <main class="dashboard" id="notLoggedIn" style="display:none;">
+        <div class="container" style="text-align:center;padding:200px 24px;">
+            <h1 style="font-family:var(--font-heading);font-size:2rem;margin-bottom:16px;">🔐 Login Required</h1>
+            <p style="color:var(--text-muted);margin-bottom:24px;">Please login or signup to access your dashboard.</p>
+            <a href="index.html" class="btn btn-primary">Go to Home Page</a>
+        </div>
+    </main>
+
+    <!-- New Document Modal -->
+    <div class="modal-overlay" id="newDocModal">
+        <div class="modal">
+            <button class="modal-close" onclick="hideModal('newDocModal')">&times;</button>
+            <div class="modal-header"><div class="modal-icon">📄</div><h2>New Document</h2></div>
+            <form class="auth-form" onsubmit="createDocument(event)">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="newDocTitle" placeholder="Document title" required>
+                </div>
+                <div class="form-group">
+                    <label>Content / Notes</label>
+                    <textarea id="newDocContent" class="latex-input" style="min-height:100px" placeholder="Write your notes..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">📄 Create Document</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- New Assignment Modal -->
+    <div class="modal-overlay" id="newAssignmentModal">
+        <div class="modal">
+            <button class="modal-close" onclick="hideModal('newAssignmentModal')">&times;</button>
+            <div class="modal-header"><div class="modal-icon">📝</div><h2>New Assignment</h2></div>
+            <form class="auth-form" onsubmit="createAssignment(event)">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="newAssignTitle" placeholder="Assignment title" required>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="newAssignSubject" placeholder="e.g. Calculus" value="Mathematics">
+                </div>
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" id="newAssignDue">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="newAssignNotes" class="latex-input" style="min-height:80px" placeholder="Add notes..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">📝 Create Assignment</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="supabase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="database.js"></script>
+    <script src="dashboard-app.js"></script>
+</body>
+</html>

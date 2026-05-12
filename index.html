@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathVoice — AI Math Voice Typing Tool</title>
+    <meta name="description" content="Speak math equations, save documents & assignments, export to Word.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">
+            <span class="brand-icon">∑</span>
+            <span class="brand-text">Math<span class="brand-accent">Voice</span></span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="#hero" class="nav-link active">Home</a>
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#editor-section" class="nav-link">Editor</a>
+            <a href="dashboard.html" class="nav-link" id="dashboardLink" style="display:none;">Dashboard</a>
+        </div>
+        <div class="nav-auth" id="navAuth">
+            <!-- Logged out state -->
+            <div id="authButtons">
+                <button class="btn btn-secondary btn-sm" onclick="showModal('loginModal')">Login</button>
+                <button class="btn btn-primary btn-sm" onclick="showModal('signupModal')">Sign Up</button>
+            </div>
+            <!-- Logged in state -->
+            <div id="userMenu" style="display:none;">
+                <div class="user-badge" id="userBadge" onclick="toggleUserDropdown()">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span class="user-name" id="userName">User</span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L1 3h10L6 8z"/></svg>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+                    <a href="#editor-section" class="dropdown-item">✏️ Editor</a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" onclick="handleLogout()">🚪 Logout</button>
+                </div>
+            </div>
+        </div>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="hideModal('loginModal')">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon">🔐</div>
+                <h2>Welcome Back</h2>
+                <p>Sign in to access your documents & assignments</p>
+            </div>
+            <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader" style="display:none;">⏳</span>
+                </button>
+                <div class="form-footer">
+                    <button type="button" class="link-btn" onclick="handleForgotPassword()">Forgot password?</button>
+                    <p>Don't have an account? <button type="button" class="link-btn" onclick="hideModal('loginModal');showModal('signupModal')">Sign Up</button></p>
+                </div>
+                <div class="form-error" id="loginError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="hideModal('signupModal')">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon">🚀</div>
+                <h2>Create Account</h2>
+                <p>Start saving your math works & assignments</p>
+            </div>
+            <form class="auth-form" id="signupForm" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" placeholder="Ahmad Junaidi" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="signupConfirm">Confirm Password</label>
+                    <input type="password" id="signupConfirm" placeholder="Re-enter password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" id="signupBtn">
+                    <span class="btn-text">Create Account</span>
+                    <span class="btn-loader" style="display:none;">⏳</span>
+                </button>
+                <div class="form-footer">
+                    <p>Already have an account? <button type="button" class="link-btn" onclick="hideModal('signupModal');showModal('loginModal')">Sign In</button></p>
+                </div>
+                <div class="form-error" id="signupError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg-effects">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+            <div class="grid-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">🎤 Voice-Powered Math</div>
+            <h1 class="hero-title">Speak Math.<br><span class="gradient-text">See It Rendered.</span></h1>
+            <p class="hero-subtitle">Voice-to-math typing tool with document management, assignments tracker, and Word export. Save everything to the cloud!</p>
+            <div class="hero-buttons">
+                <a href="#editor-section" class="btn btn-primary btn-glow">
+                    <span class="btn-icon">✏️</span> Start Typing Math
+                </a>
+                <button class="btn btn-secondary" onclick="showModal('signupModal')" id="heroSignupBtn">
+                    <span class="btn-icon">🚀</span> Create Free Account
+                </button>
+            </div>
+            <div class="hero-demo">
+                <div class="demo-card">
+                    <div class="demo-label">🎤 You say:</div>
+                    <div class="demo-speech">"integral of x squared dx from 0 to infinity"</div>
+                    <div class="demo-arrow">↓</div>
+                    <div class="demo-label">📐 You get:</div>
+                    <div class="demo-math" id="heroMath"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Powerful <span class="gradient-text">Features</span></h2>
+            <p class="section-subtitle">Everything you need to type math equations effortlessly</p>
+            <div class="features-grid">
+                <div class="feature-card"><div class="feature-icon">🎤</div><h3>Voice Input</h3><p>Speak equations naturally. Our smart parser understands math terminology.</p></div>
+                <div class="feature-card"><div class="feature-icon">⌨️</div><h3>LaTeX Editor</h3><p>Type LaTeX directly with live preview and quick templates.</p></div>
+                <div class="feature-card"><div class="feature-icon">📄</div><h3>Export to Word</h3><p>Download equations as formatted .docx files for MS Word.</p></div>
+                <div class="feature-card"><div class="feature-icon">📁</div><h3>Documents</h3><p>Organize equations into documents. Save to cloud with Supabase.</p></div>
+                <div class="feature-card"><div class="feature-icon">📝</div><h3>Assignments</h3><p>Track math homework with due dates, subjects, and status.</p></div>
+                <div class="feature-card"><div class="feature-icon">🔐</div><h3>User Accounts</h3><p>Login & signup to sync your work across devices securely.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Editor Section -->
+    <section class="editor-section" id="editor-section">
+        <div class="container">
+            <h2 class="section-title">Math <span class="gradient-text">Editor</span></h2>
+            <div class="editor-workspace">
+                <!-- Input Panel -->
+                <div class="editor-panel input-panel">
+                    <div class="panel-header">
+                        <div class="panel-tabs">
+                            <button class="panel-tab active" data-tab="voice" id="tabVoice">🎤 Voice</button>
+                            <button class="panel-tab" data-tab="latex" id="tabLatex">⌨️ LaTeX</button>
+                            <button class="panel-tab" data-tab="symbols" id="tabSymbols">📋 Symbols</button>
+                        </div>
+                    </div>
+                    <div class="tab-content active" id="voiceTab">
+                        <div class="voice-area">
+                            <div class="voice-status" id="voiceStatus">Click the microphone to start speaking</div>
+                            <button class="mic-btn" id="micBtn" aria-label="Start voice recording">
+                                <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                                </svg>
+                                <div class="mic-pulse"></div>
+                            </button>
+                            <div class="voice-transcript" id="voiceTranscript">Your spoken text will appear here...</div>
+                            <div class="voice-waveform" id="waveform">
+                                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="latexTab">
+                        <div class="latex-area">
+                            <label for="latexInput" class="input-label">Type LaTeX code:</label>
+                            <textarea id="latexInput" class="latex-input" placeholder="e.g. \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}" spellcheck="false"></textarea>
+                            <div class="quick-templates">
+                                <span class="template-label">Quick:</span>
+                                <button class="template-btn" data-latex="\\frac{a}{b}">a/b</button>
+                                <button class="template-btn" data-latex="\\sqrt{x}">√x</button>
+                                <button class="template-btn" data-latex="x^{n}">xⁿ</button>
+                                <button class="template-btn" data-latex="\\int_{a}^{b} f(x) \\, dx">∫</button>
+                                <button class="template-btn" data-latex="\\sum_{i=1}^{n}">∑</button>
+                                <button class="template-btn" data-latex="\\lim_{x \\to \\infty}">lim</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="symbolsTab">
+                        <div class="symbols-area">
+                            <div class="symbol-category"><h4>Greek Letters</h4><div class="symbol-grid" id="greekSymbols"></div></div>
+                            <div class="symbol-category"><h4>Operators</h4><div class="symbol-grid" id="operatorSymbols"></div></div>
+                            <div class="symbol-category"><h4>Relations</h4><div class="symbol-grid" id="relationSymbols"></div></div>
+                            <div class="symbol-category"><h4>Arrows</h4><div class="symbol-grid" id="arrowSymbols"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Preview Panel -->
+                <div class="editor-panel preview-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">📐 Live Preview</h3>
+                        <div class="preview-actions">
+                            <button class="action-btn" id="copyLatexBtn" title="Copy LaTeX">📋 Copy</button>
+                            <button class="action-btn" id="saveBtn" title="Save equation">💾 Save</button>
+                            <button class="action-btn btn-export" id="exportWordBtn" title="Export to Word">📄 .docx</button>
+                        </div>
+                    </div>
+                    <div class="preview-area" id="previewArea">
+                        <div class="preview-placeholder">Your rendered equation will appear here</div>
+                    </div>
+                    <div class="latex-display">
+                        <span class="latex-label">LaTeX:</span>
+                        <code id="latexCode" class="latex-code">—</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save to Document/Assignment -->
+            <div class="save-options" id="saveOptions" style="display:none;">
+                <h3>📁 Save Equation To...</h3>
+                <div class="save-options-grid">
+                    <div class="save-option" onclick="showSaveToDocModal()">
+                        <div class="save-option-icon">📄</div>
+                        <h4>New Document</h4>
+                        <p>Create a document with this equation</p>
+                    </div>
+                    <div class="save-option" onclick="showSaveToAssignmentModal()">
+                        <div class="save-option-icon">📝</div>
+                        <h4>New Assignment</h4>
+                        <p>Add to a homework assignment</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Equations -->
+            <div class="saved-section">
+                <div class="saved-header">
+                    <h3>💾 Saved Equations</h3>
+                    <button class="action-btn" id="clearAllBtn">🗑️ Clear All</button>
+                </div>
+                <div class="saved-grid" id="savedGrid">
+                    <div class="empty-state">No saved equations yet. Start typing!</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Save to Document Modal -->
+    <div class="modal-overlay" id="saveDocModal">
+        <div class="modal">
+            <button class="modal-close" onclick="hideModal('saveDocModal')">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon">📄</div>
+                <h2>Save as Document</h2>
+            </div>
+            <form class="auth-form" onsubmit="handleSaveDocument(event)">
+                <div class="form-group">
+                    <label for="docTitle">Document Title</label>
+                    <input type="text" id="docTitle" placeholder="e.g. Calculus Notes Ch 5" required>
+                </div>
+                <div class="form-group">
+                    <label for="docContent">Notes (optional)</label>
+                    <textarea id="docContent" class="latex-input" style="min-height:80px" placeholder="Add any notes..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">💾 Save Document</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Save to Assignment Modal -->
+    <div class="modal-overlay" id="saveAssignmentModal">
+        <div class="modal">
+            <button class="modal-close" onclick="hideModal('saveAssignmentModal')">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon">📝</div>
+                <h2>Save as Assignment</h2>
+            </div>
+            <form class="auth-form" onsubmit="handleSaveAssignment(event)">
+                <div class="form-group">
+                    <label for="assignTitle">Assignment Title</label>
+                    <input type="text" id="assignTitle" placeholder="e.g. Math Homework 3" required>
+                </div>
+                <div class="form-group">
+                    <label for="assignSubject">Subject</label>
+                    <input type="text" id="assignSubject" placeholder="e.g. Calculus, Algebra" value="Mathematics">
+                </div>
+                <div class="form-group">
+                    <label for="assignDue">Due Date</label>
+                    <input type="date" id="assignDue">
+                </div>
+                <div class="form-group">
+                    <label for="assignNotes">Notes (optional)</label>
+                    <textarea id="assignNotes" class="latex-input" style="min-height:80px" placeholder="Add notes..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">📝 Save Assignment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="brand-icon">∑</span>
+                    <span class="brand-text">Math<span class="brand-accent">Voice</span></span>
+                    <p class="footer-desc">Voice-powered math typing with cloud storage.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="#hero">Home</a>
+                    <a href="#editor-section">Editor</a>
+                    <a href="dashboard.html">Dashboard</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 MathVoice. Built with ❤️</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="supabase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="database.js"></script>
+    <script src="parser.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
