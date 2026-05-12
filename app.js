@@ -73,12 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================
   //  Navigation
   // ========================
-  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => navLinks.classList.remove('open'));
+    });
+  }
   window.addEventListener('scroll', () => {
-    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
-  });
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => navLinks.classList.remove('open'));
+    const nav = document.querySelector('.navbar');
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 50);
   });
 
   // ========================
@@ -106,79 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ========================
-  //  Symbol Palette
-  // ========================
-  const SYMBOLS = {
-    greek: [
-      { display: 'α', latex: '\\alpha' }, { display: 'β', latex: '\\beta' },
-      { display: 'γ', latex: '\\gamma' }, { display: 'δ', latex: '\\delta' },
-      { display: 'ε', latex: '\\epsilon' }, { display: 'θ', latex: '\\theta' },
-      { display: 'λ', latex: '\\lambda' }, { display: 'μ', latex: '\\mu' },
-      { display: 'π', latex: '\\pi' }, { display: 'σ', latex: '\\sigma' },
-      { display: 'φ', latex: '\\phi' }, { display: 'ω', latex: '\\omega' },
-      { display: 'Γ', latex: '\\Gamma' }, { display: 'Δ', latex: '\\Delta' },
-      { display: 'Σ', latex: '\\Sigma' }, { display: 'Ω', latex: '\\Omega' },
-    ],
-    operator: [
-      { display: '±', latex: '\\pm' }, { display: '×', latex: '\\times' },
-      { display: '÷', latex: '\\div' }, { display: '·', latex: '\\cdot' },
-      { display: '∂', latex: '\\partial' }, { display: '∇', latex: '\\nabla' },
-      { display: '∫', latex: '\\int' }, { display: '∬', latex: '\\iint' },
-      { display: '∑', latex: '\\sum' }, { display: '∏', latex: '\\prod' },
-      { display: '√', latex: '\\sqrt{}' }, { display: '∞', latex: '\\infty' },
-    ],
-    relation: [
-      { display: '≠', latex: '\\neq' }, { display: '≤', latex: '\\leq' },
-      { display: '≥', latex: '\\geq' }, { display: '≈', latex: '\\approx' },
-      { display: '∝', latex: '\\propto' }, { display: '≡', latex: '\\equiv' },
-      { display: '∈', latex: '\\in' }, { display: '∉', latex: '\\notin' },
-      { display: '⊂', latex: '\\subset' }, { display: '∪', latex: '\\cup' },
-      { display: '∩', latex: '\\cap' }, { display: '∅', latex: '\\emptyset' },
-    ],
-    arrow: [
-      { display: '→', latex: '\\rightarrow' }, { display: '←', latex: '\\leftarrow' },
-      { display: '↔', latex: '\\leftrightarrow' }, { display: '⇒', latex: '\\Rightarrow' },
-      { display: '⇐', latex: '\\Leftarrow' }, { display: '⇔', latex: '\\Leftrightarrow' },
-      { display: '↦', latex: '\\mapsto' }, { display: '↑', latex: '\\uparrow' },
-      { display: '↓', latex: '\\downarrow' },
-    ],
-  };
-
-  function buildSymbolPalette() {
-    const grids = {
-      greek: document.getElementById('greekSymbols'),
-      operator: document.getElementById('operatorSymbols'),
-      relation: document.getElementById('relationSymbols'),
-      arrow: document.getElementById('arrowSymbols'),
-    };
-    for (const [cat, syms] of Object.entries(SYMBOLS)) {
-      const grid = grids[cat];
-      if (!grid) continue;
-      syms.forEach(sym => {
-        const btn = document.createElement('button');
-        btn.className = 'symbol-btn';
-        btn.textContent = sym.display;
-        btn.title = sym.latex;
-        btn.addEventListener('click', () => insertSymbol(sym.latex));
-        grid.appendChild(btn);
-      });
-    }
-  }
-
   function insertSymbol(latex) {
-    tabs.forEach(t => t.classList.remove('active'));
-    Object.values(tabContents).forEach(c => c.classList.remove('active'));
-    document.getElementById('tabLatex').classList.add('active');
-    tabContents['latex'].classList.add('active');
     const pos = latexInput.selectionStart || latexInput.value.length;
     latexInput.value = latexInput.value.substring(0, pos) + latex + latexInput.value.substring(pos);
     latexInput.focus();
     latexInput.selectionStart = latexInput.selectionEnd = pos + latex.length;
     renderLatex(latexInput.value);
   }
-
-  buildSymbolPalette();
 
   // ========================
   //  LaTeX Input → Preview
@@ -215,70 +152,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (preloadLatex) {
     latexInput.value = decodeURIComponent(preloadLatex);
     renderLatex(latexInput.value);
-    tabs.forEach(t => t.classList.remove('active'));
-    Object.values(tabContents).forEach(c => c.classList.remove('active'));
-    document.getElementById('tabLatex').classList.add('active');
-    tabContents['latex'].classList.add('active');
   }
 
-  // ========================
-  //  Voice Recognition
-  // ========================
-  function initSpeechRecognition() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      voiceStatus.textContent = '⚠️ Speech not supported. Use Chrome.';
-      micBtn.disabled = true;
-      return;
+  // AI Refine for Home Editor
+  window.refineWithAI = async function() {
+    const text = latexInput.value.trim();
+    if (!text) return;
+    const btn = document.getElementById('aiMagicBtn');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    try {
+      const result = await _aiCall({ contents: [{ parts: [{ text: `Convert this natural language math into LaTeX code: "${text}". Output ONLY the LaTeX code (no explanation). Use $$...$$ for the main equation.` }] }] });
+      const cleanLatex = result.match(/\$\$([\s\S]+?)\$\$/)?.[1] || result.replace(/\$/g, '').trim();
+      latexInput.value = cleanLatex;
+      renderLatex(cleanLatex);
+      showToast('✨ AI Refined!');
+    } catch (err) {
+      showToast('❌ AI Error: ' + err.message);
     }
-    recognition = new SR();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => {
-      isListening = true;
-      micBtn.classList.add('active');
-      voiceStatus.textContent = '🎤 Listening...';
-      voiceStatus.classList.add('listening');
-      waveform.classList.add('active');
-    };
-    recognition.onend = () => {
-      isListening = false;
-      micBtn.classList.remove('active');
-      voiceStatus.textContent = 'Click the microphone to start speaking';
-      voiceStatus.classList.remove('listening');
-      waveform.classList.remove('active');
-    };
-    recognition.onerror = (e) => {
-      const msgs = { 'no-speech': 'No speech detected.', 'not-allowed': '⚠️ Mic access denied.' };
-      voiceStatus.textContent = msgs[e.error] || `Error: ${e.error}`;
-      isListening = false;
-      micBtn.classList.remove('active');
-      waveform.classList.remove('active');
-    };
-    recognition.onresult = (event) => {
-      let finalT = '', interimT = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) finalT += event.results[i][0].transcript;
-        else interimT += event.results[i][0].transcript;
-      }
-      voiceTranscript.textContent = finalT || interimT;
-      voiceTranscript.classList.add('has-text');
-      if (finalT) {
-        const latex = MathParser.parse(finalT);
-        renderLatex(latex);
-        latexInput.value = latex;
-        showToast('✅ Equation converted from speech!');
-      }
-    };
-  }
-
-  micBtn.addEventListener('click', () => {
-    if (!recognition) { initSpeechRecognition(); if (!recognition) return; }
-    if (isListening) { recognition.stop(); } else { voiceTranscript.textContent = 'Listening...'; recognition.start(); }
-  });
-  initSpeechRecognition();
+    btn.innerHTML = originalContent;
+  };
 
   // ========================
   //  Copy LaTeX

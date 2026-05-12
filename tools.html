@@ -73,8 +73,16 @@
                             <label class="option-check">
                                 <input type="checkbox" id="optDetailed" checked> <span>Step-by-step</span>
                             </label>
+                            <label class="option-check">
+                                <input type="checkbox" id="optLatex" checked> <span>Strict LaTeX</span>
+                            </label>
+                            <label class="option-check">
+                                <input type="checkbox" id="optExplain"> <span>Explain Theory</span>
+                            </label>
                         </div>
-                        <button class="btn btn-primary" style="width:100%" onclick="solveMath()">🧮 Solve with AI</button>
+                        <button class="btn btn-primary" id="solveBtn" style="width:100%" onclick="solveMath()">
+                            <span id="solveBtnText">🧮 Solve with AI</span>
+                        </button>
                     </div>
                     <div class="editor-panel">
                         <div class="field-label">AI Solution</div>
@@ -101,23 +109,177 @@
                             <p>Click to upload or drag image here</p>
                             <input type="file" id="fileInput" hidden accept="image/*" onchange="handleImageUpload(event)">
                         </div>
-                        <div id="imagePreview" style="display:none; margin-top:20px; text-align:center">
-                            <img id="previewImg" style="max-width:100%; border-radius:12px; border:1px solid var(--border-light)">
+                        
+                        <div id="imagePreviewBox" style="display:none; margin-top:20px; text-align:center; position:relative">
+                            <img id="imagePreview" style="max-width:100%; border-radius:12px; border:1px solid var(--border-glass)">
+                            <button class="btn btn-secondary" style="position:absolute; top:10px; right:10px; padding:8px 12px" onclick="clearImage()">×</button>
                         </div>
-                        <button class="btn btn-primary" style="width:100%; margin-top:20px" onclick="runOCR()">🔍 Extract Math</button>
+
+                        <div class="field-label" style="margin-top:24px">OCR Mode</div>
+                        <div class="thesis-modes" style="margin-bottom:20px">
+                            <label class="mode-btn active" style="cursor:pointer">
+                                <input type="radio" name="ocrMode" value="latex" checked style="display:none" onchange="this.parentElement.parentElement.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); this.parentElement.classList.add('active')">
+                                LaTeX Only
+                            </label>
+                            <label class="mode-btn" style="cursor:pointer">
+                                <input type="radio" name="ocrMode" value="solve" style="display:none" onchange="this.parentElement.parentElement.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); this.parentElement.classList.add('active')">
+                                Extract & Solve
+                            </label>
+                            <label class="mode-btn" style="cursor:pointer">
+                                <input type="radio" name="ocrMode" value="explain" style="display:none" onchange="this.parentElement.parentElement.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); this.parentElement.classList.add('active')">
+                                Deep Explain
+                            </label>
+                        </div>
+
+                        <button class="btn btn-primary" id="ocrBtn" style="width:100%" onclick="runOCR()">
+                            <span id="ocrBtnText"><i class="fa-solid fa-camera"></i> Extract Math</span>
+                        </button>
                     </div>
                     <div class="editor-panel">
-                        <div class="field-label">LaTeX Result</div>
+                        <div class="field-label">AI Result</div>
+                        <div id="ocrLatexPreview" style="display:none; margin-bottom:20px; padding:20px; background:rgba(255,255,255,0.05); border-radius:12px">
+                            <div class="field-label" style="font-size:12px; margin-bottom:10px">Math Preview</div>
+                            <div id="ocrMathPreview"></div>
+                        </div>
                         <div class="ai-output" id="ocrOutput">
-                            <div style="color:var(--text-dim)">LaTeX will appear here...</div>
+                            <div style="color:var(--text-dim)"><i class="fa-solid fa-wand-magic-sparkles"></i> LaTeX or Solution will appear here...</div>
+                        </div>
+                        <div class="workspace-grid" style="grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:20px">
+                            <button class="btn btn-secondary" id="copyOcrBtn" style="display:none; padding:8px" onclick="copyOCR()"><i class="fa-solid fa-copy"></i> Copy</button>
+                            <button class="btn btn-secondary" id="loadEditorBtn" style="display:none; padding:8px" onclick="loadOCRInEditor()"><i class="fa-solid fa-pen-to-square"></i> Editor</button>
+                            <button class="btn btn-secondary" id="exportOcrBtn" style="display:none; padding:8px" onclick="exportOCRWord()"><i class="fa-solid fa-file-word"></i> Word</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Other panels follow the same pattern... -->
-        <!-- I'll keep them consistent but focused for the response -->
+        <!-- CALCULATOR -->
+        <div class="tool-panel" id="tool-calculator">
+            <div class="workspace-card">
+                <div class="modal-header" style="text-align:left">
+                    <h2 class="modal-title">Smart <span class="gradient-text">Calculator</span></h2>
+                    <p class="modal-subtitle">Symbolic math, matrix algebra, and statistics.</p>
+                </div>
+                <div class="workspace-grid">
+                    <div class="editor-panel">
+                        <div class="field-label">Quick Expression</div>
+                        <div class="input-wrapper">
+                            <input type="text" id="calcInput" class="ai-textarea" style="min-height:60px" placeholder="e.g. det([1,2;3,4]) or mean(1,2,3,4)">
+                        </div>
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:20px">
+                            <button class="btn btn-secondary" style="padding:10px" onclick="insertCalc('sin(')">sin</button>
+                            <button class="btn btn-secondary" style="padding:10px" onclick="insertCalc('cos(')">cos</button>
+                            <button class="btn btn-secondary" style="padding:10px" onclick="insertCalc('tan(')">tan</button>
+                            <button class="btn btn-secondary" style="padding:10px" onclick="insertCalc('sqrt(')">sqrt</button>
+                        </div>
+                        <button class="btn btn-primary" id="calcBtn" style="width:100%; margin-top:20px" onclick="calculate()">
+                            <span id="calcBtnText">🧮 Compute</span>
+                        </button>
+                    </div>
+                    <div class="editor-panel">
+                        <div class="field-label">History & Result</div>
+                        <div class="ai-output" id="calcHistory">
+                            <div style="color:var(--text-dim)"><i class="fa-solid fa-clock-rotate-left"></i> History will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THESIS WRITER -->
+        <div class="tool-panel" id="tool-thesis">
+            <div class="workspace-card">
+                <div class="modal-header" style="text-align:left">
+                    <h2 class="modal-title">Thesis <span class="gradient-text">Writer</span></h2>
+                    <p class="modal-subtitle">Generate academic proofs, abstracts, and conclusions.</p>
+                </div>
+                <div class="workspace-grid">
+                    <div class="editor-panel">
+                        <div class="field-label">Topic / Abstract</div>
+                        <textarea id="thesisInput" class="ai-textarea" style="min-height:200px" placeholder="Describe your research topic or specific theorem..."></textarea>
+                        
+                        <div class="field-label">Writer Mode</div>
+                        <div class="thesis-modes">
+                            <button class="mode-btn active" onclick="setThesisMode(this,'abstract')">Abstract</button>
+                            <button class="mode-btn" onclick="setThesisMode(this,'proof')">Math Proof</button>
+                            <button class="mode-btn" onclick="setThesisMode(this,'conclusion')">Conclusion</button>
+                        </div>
+                        <button class="btn btn-primary" id="thesisBtn" style="width:100%; margin-top:20px" onclick="runThesis()">
+                            <span id="thesisBtnText">📖 Generate Content</span>
+                        </button>
+                    </div>
+                    <div class="editor-panel">
+                        <div class="field-label">Generated Manuscript</div>
+                        <div class="ai-output" id="thesisOutput">
+                            <div style="color:var(--text-dim)"><i class="fa-solid fa-pen-nib"></i> Your academic content will appear here...</div>
+                        </div>
+                        <div style="display:flex; gap:12px; margin-top:20px">
+                            <button class="btn btn-secondary" id="copyThesisBtn" style="display:none; flex:1" onclick="copyThesis()"><i class="fa-solid fa-copy"></i> Copy</button>
+                            <button class="btn btn-secondary" id="exportThesisBtn" style="display:none; flex:1" onclick="exportThesisWord()"><i class="fa-solid fa-file-word"></i> Word</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOCUMENT AI -->
+        <div class="tool-panel" id="tool-document">
+            <div class="workspace-card">
+                <div class="modal-header" style="text-align:left">
+                    <h2 class="modal-title">Document <span class="gradient-text">AI</span></h2>
+                    <p class="modal-subtitle">Intelligent document summarization and extraction.</p>
+                </div>
+                <div class="workspace-grid">
+                    <div class="editor-panel">
+                        <div class="field-label">Paste Document Text</div>
+                        <textarea id="docInput" class="ai-textarea" style="min-height:240px" placeholder="Paste your research paper or notes here..."></textarea>
+                        <button class="btn btn-primary" id="docBtn" style="width:100%; margin-top:20px" onclick="summarizeDoc()">
+                            <span id="docBtnText">📄 Summarize with AI</span>
+                        </button>
+                    </div>
+                    <div class="editor-panel">
+                        <div class="field-label">AI Summary</div>
+                        <div class="ai-output" id="docOutput">
+                            <div style="color:var(--text-dim)"><i class="fa-solid fa-file-lines"></i> Summary will appear here...</div>
+                        </div>
+                        <button class="btn btn-secondary" id="copyDocBtn" style="display:none; width:100%; margin-top:20px" onclick="copyDoc()"><i class="fa-solid fa-copy"></i> Copy Summary</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESEARCH -->
+        <div class="tool-panel" id="tool-research">
+            <div class="workspace-card">
+                <div class="modal-header" style="text-align:left">
+                    <h2 class="modal-title">Academic <span class="gradient-text">Research</span></h2>
+                    <p class="modal-subtitle">Wikipedia integration + AI research assistant.</p>
+                </div>
+                <div class="workspace-grid">
+                    <div class="editor-panel">
+                        <div class="field-label">Search Topic</div>
+                        <div class="input-wrapper" style="margin-bottom:20px">
+                            <input type="text" id="wikiInput" class="ai-textarea" style="min-height:60px" placeholder="e.g. Quantum Mechanics, Riemann Hypothesis...">
+                            <button class="btn btn-primary" id="wikiBtn" style="position:absolute; right:8px; top:8px; padding:12px 24px" onclick="searchWiki()">
+                                <span id="wikiBtnText">Search</span>
+                            </button>
+                        </div>
+                        <div id="wikiResult" class="ai-output" style="min-height:200px">
+                            <div style="color:var(--text-dim)"><i class="fa-solid fa-magnifying-glass"></i> Search results will appear here...</div>
+                        </div>
+                    </div>
+                    <div class="editor-panel">
+                        <div class="field-label">AI Research Assistant</div>
+                        <textarea id="researchAIInput" class="ai-textarea" style="min-height:100px; margin-bottom:16px" placeholder="Ask AI about the research topic..."></textarea>
+                        <button class="btn btn-secondary" id="researchBtn" style="width:100%" onclick="askResearchAI()">
+                            <span id="researchBtnText">🤖 Ask AI</span>
+                        </button>
+                        <div class="ai-output" id="researchAIOutput" style="margin-top:20px; display:none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <div class="toast" id="toast"></div>

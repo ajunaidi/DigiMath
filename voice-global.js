@@ -21,7 +21,7 @@ const VoiceInput = (() => {
       isListening = true;
       if (activeMicBtn) {
         activeMicBtn.classList.add('listening');
-        activeMicBtn.innerHTML = '⏹️';
+        activeMicBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
       }
       showVoiceToast('🎤 Listening... Speak now');
     };
@@ -30,7 +30,7 @@ const VoiceInput = (() => {
       isListening = false;
       if (activeMicBtn) {
         activeMicBtn.classList.remove('listening');
-        activeMicBtn.innerHTML = '🎤';
+        activeMicBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
       }
       activeMicBtn = null;
       targetElement = null;
@@ -40,7 +40,7 @@ const VoiceInput = (() => {
       isListening = false;
       if (activeMicBtn) {
         activeMicBtn.classList.remove('listening');
-        activeMicBtn.innerHTML = '🎤';
+        activeMicBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
       }
       if (e.error === 'not-allowed') showVoiceToast('⚠️ Microphone access denied');
     };

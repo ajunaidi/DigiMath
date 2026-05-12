@@ -76,10 +76,10 @@ async function solveMath() {
 
   const btn = document.getElementById('solveBtn');
   const btnText = document.getElementById('solveBtnText');
-  btn.classList.add('loading');
-  btnText.textContent = '⏳ Solving...';
-
   const output = document.getElementById('solverOutput');
+
+  btn.classList.add('loading');
+  btnText.textContent = '⏳ Thinking...';
   output.innerHTML = '<div class="output-placeholder"><div style="font-size:32px">⏳</div><div>AI is solving your problem...</div></div>';
 
   const prompt = `You are an expert MSc/PhD-level mathematics professor. Solve the following problem completely.
@@ -95,37 +95,22 @@ ${explain ? '- Explain the mathematical concepts and theorems used at each step'
 - Format your response with markdown (use ## for headings, **bold** for key terms)
 - For any equation, put the LaTeX in $$...$$ blocks`;
 
-  const btn = document.getElementById('solveBtn');
-  const btnText = document.getElementById('solveBtnText');
-  const output = document.getElementById('solverOutput');
-
-  btn.classList.add('loading');
-  btnText.textContent = '⏳ Thinking...';
-
-  const prompt = `Solve this math problem: ${input}
-Instructions:
-${detailed ? '- Show ALL steps in detail, numbered clearly' : '- Show main steps only'}
-- Use clear headings for each section
-- At the end, provide a clear final answer
-- Format your response with markdown (use ## for headings, **bold** for key terms)
-- For any equation, put the LaTeX in $$...$$ blocks`;
-
   try {
     const result = await _aiCall({ contents: [{ parts: [{ text: prompt }] }] }, { model: currentSolverModel });
     lastSolution = result;
     output.innerHTML = formatAIResponse(result);
-    renderMathInElement(output, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
+    if (window.renderMathInElement) {
+        renderMathInElement(output, { 
+            delimiters: [
+                { left: '$$', right: '$$', display: true }, 
+                { left: '$', right: '$', display: false }
+            ], 
+            throwOnError: false 
+        });
+    }
     showToast(`✅ Solved with ${currentSolverModel}`);
   } catch (err) {
-    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}</div>`;
-    showToast('❌ ' + err.message);
-  }
-
-  btn.classList.remove('loading');
-  btnText.textContent = '🧮 Solve with AI';
-}
-  } catch (err) {
-    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}<br><br>Please check your Gemini API key or try again.</div>`;
+    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}<br><br>Please check your connection or try again.</div>`;
     showToast('❌ ' + err.message);
   }
 
