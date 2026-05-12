@@ -9,8 +9,8 @@
  * 5. Paste them below
  */
 
-const SUPABASE_URL = 'https://szguohhonbrkjnnmlgbc.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_UwBhwk3ezO0wtlCWvSQGZA_cEppKwRJ';
+const SUPABASE_URL = window.DIGIMATH_CONFIG?.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = window.DIGIMATH_CONFIG?.SUPABASE_ANON_KEY || '';
 
 // Initialize Supabase client
 window.supabaseClient = null;

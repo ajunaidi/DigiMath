@@ -1,42 +1,73 @@
 /**
  * DigiMath — Google Gemini AI Configuration
- * Free Tier: ~15 requests/minute, 1500 requests/day
- * Model: gemini-2.0-flash (auto-retry on rate limit)
+ * Handles model switching and auto-fallback between 1.5-flash and 2.0-flash
  */
 
-const GEMINI_API_KEY = 'AIzaSyDrCQjuDurxtXnzpKMnRjcOzR-31K9VNi0';
-const GEMINI_MODEL = 'gemini-2.0-flash';
-const GEMINI_BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+// API Key is loaded from config.js (which is git-ignored for security)
+const GEMINI_API_KEY = window.DIGIMATH_CONFIG?.GEMINI_API_KEY || '';
+
+// Current active model (starts with 1.5-flash as it is more stable for free tier quota)
+let activeModel = 'gemini-1.5-flash'; 
 
 /**
- * Call Gemini with auto-retry on rate limit (429 errors)
+ * Call Gemini with auto-retry and model fallback
  */
 async function _geminiCall(body, retries = 2) {
-  const res = await fetch(GEMINI_BASE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${GEMINI_API_KEY}`;
+  
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
 
-  if (res.status === 429 && retries > 0) {
-    // Rate limited — wait and retry
-    const waitSec = Math.min(40, 20 + (3 - retries) * 15);
-    const toastEl = document.getElementById('toast');
-    if (toastEl) {
-      toastEl.textContent = `⏳ Rate limit — waiting ${waitSec}s then retrying...`;
-      toastEl.classList.add('show');
+    // Handle Rate Limit (429)
+    if (res.status === 429 && retries > 0) {
+      const waitSec = 20;
+      showStatus(`⏳ Rate limit hit. Waiting ${waitSec}s to retry...`);
+      await new Promise(r => setTimeout(r, waitSec * 1000));
+      return _geminiCall(body, retries - 1);
     }
-    await new Promise(r => setTimeout(r, waitSec * 1000));
-    if (toastEl) toastEl.classList.remove('show');
-    return _geminiCall(body, retries - 1);
-  }
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Gemini API error (${res.status})`);
+    // Handle Quota/Model errors (often 400 or 403)
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errMsg = errData.error?.message || '';
+      
+      // If quota exceeded or model not found, try falling back to the other model
+      if ((errMsg.includes('quota') || errMsg.includes('not found') || errMsg.includes('not supported')) && activeModel === 'gemini-1.5-flash') {
+        showStatus('🔄 Switching to Gemini 2.0 Flash...');
+        activeModel = 'gemini-2.0-flash';
+        return _geminiCall(body, retries);
+      } else if ((errMsg.includes('quota') || errMsg.includes('not found')) && activeModel === 'gemini-2.0-flash') {
+        showStatus('🔄 Switching to Gemini 1.5 Flash...');
+        activeModel = 'gemini-1.5-flash';
+        return _geminiCall(body, retries);
+      }
+
+      throw new Error(errMsg || `API Error (${res.status})`);
+    }
+
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+  } catch (err) {
+    if (retries > 0 && err.message.includes('fetch')) {
+      await new Promise(r => setTimeout(r, 2000));
+      return _geminiCall(body, retries - 1);
+    }
+    throw err;
   }
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function showStatus(msg) {
+  const toastEl = document.getElementById('toast');
+  if (toastEl) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(() => toastEl.classList.remove('show'), 4000);
+  }
 }
 
 /**
