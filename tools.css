@@ -1,0 +1,186 @@
+/* ============================================
+   DigiMath — AI Tools Page Styles
+   ============================================ */
+
+/* Header */
+.tools-header {
+  padding: 100px 0 40px;
+  text-align: center;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.tools-header-badge {
+  display: inline-block; padding: 6px 18px; border-radius: 50px;
+  background: rgba(124,92,252,0.15); border: 1px solid var(--border-accent);
+  font-size: 13px; color: var(--accent-light); margin-bottom: 16px;
+}
+.tools-header-title { font-family: var(--font-heading); font-size: clamp(2rem,5vw,3.2rem); font-weight: 800; margin-bottom: 12px; }
+.tools-header-sub { color: var(--text-muted); font-size: 16px; }
+
+/* Tool Navigation */
+.tools-nav { background: var(--bg-tertiary); border-bottom: 1px solid var(--border); position: sticky; top: 72px; z-index: 100; }
+.tools-tabs { display: flex; gap: 4px; padding: 12px 0; overflow-x: auto; }
+.tool-tab {
+  padding: 10px 20px; border-radius: var(--radius-sm); border: none;
+  background: transparent; color: var(--text-muted); font-family: var(--font);
+  font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--transition);
+  white-space: nowrap;
+}
+.tool-tab:hover { background: var(--bg-glass-hover); color: var(--text); }
+.tool-tab.active { background: var(--accent); color: white; }
+
+/* Main */
+.tools-main { padding: 32px 0 80px; }
+
+/* Tool Panels */
+.tool-panel { display: none; animation: fadeInUp 0.4s ease; }
+.tool-panel.active { display: block; }
+
+/* Intro */
+.tool-intro { text-align: center; margin-bottom: 32px; }
+.tool-intro-icon { font-size: 48px; margin-bottom: 12px; }
+.tool-intro h2 { font-family: var(--font-heading); font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+.tool-intro p { color: var(--text-muted); font-size: 15px; max-width: 640px; margin: 0 auto; }
+
+/* Grids */
+.solver-grid, .ocr-grid, .thesis-grid {
+  display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px;
+}
+.calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.research-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; }
+
+/* Fields */
+.field-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.ai-textarea {
+  width: 100%; padding: 14px 16px; border-radius: var(--radius-sm);
+  background: var(--bg-tertiary); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--font); font-size: 14px;
+  line-height: 1.6; resize: vertical; min-height: 140px; outline: none;
+  transition: var(--transition);
+}
+.ai-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.calc-input {
+  padding: 11px 16px; border-radius: var(--radius-sm);
+  background: var(--bg-tertiary); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--font-mono); font-size: 14px;
+  outline: none; flex: 1; transition: var(--transition);
+}
+.calc-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.calc-input-row { display: flex; gap: 8px; }
+
+/* AI Output */
+.ai-output {
+  background: var(--bg-tertiary); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; min-height: 200px;
+  font-size: 14px; line-height: 1.8; color: var(--text);
+  overflow-y: auto; max-height: 600px;
+}
+.output-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 160px; color: var(--text-muted); text-align: center; }
+.output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.output-actions { display: flex; gap: 6px; }
+
+/* AI Btn Loading */
+.ai-btn { position: relative; }
+.ai-btn.loading { opacity: 0.7; cursor: not-allowed; }
+
+/* Solver */
+.solver-presets { margin-top: 12px; }
+.preset-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.preset-btn {
+  padding: 6px 12px; border-radius: var(--radius-xs);
+  background: var(--bg-glass); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 12px; cursor: pointer;
+  transition: var(--transition); font-family: var(--font);
+}
+.preset-btn:hover { background: var(--bg-glass-hover); color: var(--text); border-color: var(--border-accent); }
+.solver-options { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+.option-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+.option-check input { accent-color: var(--accent); }
+
+/* OCR */
+.upload-zone {
+  border: 2px dashed var(--border-accent); border-radius: var(--radius);
+  padding: 40px 20px; text-align: center; cursor: pointer;
+  transition: var(--transition); background: var(--bg-glass);
+}
+.upload-zone:hover { border-color: var(--accent); background: var(--bg-glass-hover); }
+.upload-zone.dragover { border-color: var(--accent2); background: rgba(6,214,160,0.05); }
+.upload-icon { font-size: 48px; margin-bottom: 12px; }
+.upload-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+.upload-sub { font-size: 12px; color: var(--text-muted); }
+.img-preview { width: 100%; max-height: 280px; object-fit: contain; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-primary); }
+.ocr-mode-select { margin: 16px 0; }
+.radio-group { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.radio-opt { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+.radio-opt input { accent-color: var(--accent); }
+
+/* Calculator */
+.calc-section { margin-bottom: 20px; }
+.calc-history {
+  margin-top: 8px; max-height: 200px; overflow-y: auto;
+  background: var(--bg-primary); border-radius: var(--radius-sm);
+  border: 1px solid var(--border); padding: 8px;
+}
+.calc-entry { padding: 6px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 13px; margin-bottom: 4px; }
+.calc-entry:hover { background: var(--bg-glass); }
+.calc-entry .expr { color: var(--text-muted); }
+.calc-entry .result { color: var(--accent-light); font-weight: 600; }
+.calc-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.calc-key {
+  padding: 8px 14px; border-radius: var(--radius-xs);
+  background: var(--bg-glass); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 13px; cursor: pointer;
+  transition: var(--transition); font-family: var(--font-mono);
+}
+.calc-key:hover { background: var(--accent); color: white; border-color: var(--accent); }
+.calc-key-clear { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: var(--danger); }
+.matrix-output {
+  margin-top: 8px; padding: 10px 14px; border-radius: var(--radius-sm);
+  background: var(--bg-primary); border: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 13px; color: var(--accent-light);
+  min-height: 40px; white-space: pre-wrap; display: none;
+}
+.stats-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.calc-explain-section { margin-top: 24px; padding: 20px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius); }
+
+/* Thesis */
+.thesis-modes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.mode-btn {
+  padding: 8px 14px; border-radius: var(--radius-xs);
+  background: var(--bg-glass); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 13px; cursor: pointer;
+  transition: var(--transition); font-family: var(--font);
+}
+.mode-btn:hover { background: var(--bg-glass-hover); color: var(--text); }
+.mode-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* Research */
+.research-quick { margin-top: 16px; }
+.wiki-result {
+  background: var(--bg-tertiary); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; min-height: 200px;
+  overflow-y: auto; max-height: 500px;
+}
+.wiki-article-title { font-family: var(--font-heading); font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--accent-light); }
+.wiki-article-summary { font-size: 14px; line-height: 1.8; color: var(--text-muted); }
+.wiki-read-more { display: inline-block; margin-top: 12px; color: var(--accent-light); font-size: 13px; text-decoration: none; }
+.wiki-read-more:hover { color: var(--text); }
+
+/* Formatted AI output */
+.ai-output h1,.ai-output h2,.ai-output h3 { font-family: var(--font-heading); color: var(--text); margin: 16px 0 8px; }
+.ai-output h2 { font-size: 18px; color: var(--accent-light); }
+.ai-output h3 { font-size: 15px; color: var(--accent2); }
+.ai-output p { margin: 8px 0; }
+.ai-output strong { color: var(--text); }
+.ai-output code { font-family: var(--font-mono); background: var(--bg-primary); padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--accent-light); }
+.ai-output pre { background: var(--bg-primary); padding: 12px 16px; border-radius: var(--radius-sm); overflow-x: auto; margin: 12px 0; }
+.ai-output ul, .ai-output ol { padding-left: 20px; margin: 8px 0; }
+.ai-output li { margin-bottom: 4px; }
+.step-block { background: var(--bg-primary); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 0 var(--radius-xs) var(--radius-xs) 0; margin: 8px 0; }
+.latex-block { background: rgba(124,92,252,0.08); border: 1px solid var(--border-accent); border-radius: var(--radius-sm); padding: 12px 16px; margin: 8px 0; overflow-x: auto; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .solver-grid, .ocr-grid, .calc-grid, .thesis-grid, .research-grid { grid-template-columns: 1fr; }
+  .tools-tabs { padding: 8px 0; }
+}
