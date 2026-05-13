@@ -49,8 +49,11 @@ function setResearchModel(btn, model) {
 }
 
 function quickSearch(topic) {
-  document.getElementById('wikiQuery').value = topic;
-  searchWiki();
+  const inp = document.getElementById('wikiInput');
+  if (inp) {
+    inp.value = topic;
+    searchWiki();
+  }
 }
 
 // ========================
@@ -499,10 +502,7 @@ async function searchWiki() {
   }
 }
 
-function quickSearch(topic) {
-  document.getElementById('wikiInput').value = topic;
-  searchWiki();
-}
+// Redundant quickSearch removed (using the one at the top)
 
 async function askAIAboutWiki(title, context) {
   const aiOut = document.getElementById('researchAIOutput');
@@ -569,6 +569,7 @@ async function exportToDocx(title, content) {
 //  Format AI response → HTML
 // ========================
 function formatAIResponse(text) {
+  if (!text) return '';
   return text
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -576,7 +577,7 @@ function formatAIResponse(text) {
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/^\d+\. (.+)$/gm, '<div class="step-block">$&</div>')
+    .replace(/^\d+\. (.+)$/gm, '<div class="step-block"><span class="step-num">$&</span></div>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
     .replace(/\n\n/g, '<br><br>')
@@ -633,7 +634,8 @@ async function runNewton(operation) {
 function openSettings() {
   const s = DigiMathSettings.get();
   document.getElementById('settingProvider').value = s.provider;
-  document.getElementById('settingGeminiKey').value = s.geminiKey;
+  document.getElementById('settingGeminiKey').value = s.geminiKey || '';
+  document.getElementById('settingAnthropicKey').value = s.anthropicKey || '';
   document.getElementById('settingModel').value = s.model;
   showModal('settingsModal');
 }
@@ -642,6 +644,7 @@ function saveSettings() {
   const data = {
     provider: document.getElementById('settingProvider').value,
     geminiKey: document.getElementById('settingGeminiKey').value,
+    anthropicKey: document.getElementById('settingAnthropicKey').value,
     model: document.getElementById('settingModel').value
   };
   DigiMathSettings.save(data);
