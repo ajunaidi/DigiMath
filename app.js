@@ -467,16 +467,28 @@ async function handleSaveAssignment(e) {
 
 function openSettings() {
   const s = DigiMathSettings.get();
-  document.getElementById('settingProvider').value = s.provider;
-  document.getElementById('settingGeminiKey').value = s.geminiKey;
-  document.getElementById('settingModel').value = s.model;
+  if (document.getElementById('settingProvider')) document.getElementById('settingProvider').value = s.provider || 'opencode';
+  if (document.getElementById('settingOpencodeKey')) document.getElementById('settingOpencodeKey').value = s.opencodeKey || '';
+  if (document.getElementById('settingAnthropicKey')) document.getElementById('settingAnthropicKey').value = s.anthropicKey || '';
+  if (document.getElementById('settingModel')) document.getElementById('settingModel').value = s.model;
+  toggleProviderFields();
   showModal('settingsModal');
+}
+
+function toggleProviderFields() {
+  const provider = document.getElementById('settingProvider').value;
+  const ocGroup = document.getElementById('opencodeKeyGroup');
+  const anGroup = document.getElementById('anthropicKeyGroup');
+  
+  if (ocGroup) ocGroup.style.display = provider === 'opencode' ? 'block' : 'none';
+  if (anGroup) anGroup.style.display = provider === 'anthropic' ? 'block' : 'none';
 }
 
 function saveSettings() {
   const data = {
     provider: document.getElementById('settingProvider').value,
-    geminiKey: document.getElementById('settingGeminiKey').value,
+    opencodeKey: document.getElementById('settingOpencodeKey').value,
+    anthropicKey: document.getElementById('settingAnthropicKey').value,
     model: document.getElementById('settingModel').value
   };
   DigiMathSettings.save(data);

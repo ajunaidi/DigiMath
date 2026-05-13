@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://unpkg.com/mathjs@13.0.0/lib/browser/math.js"></script>
     <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
-    <script src="https://js.puter.com/v2/"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="styles.css?v=10">
     <link rel="stylesheet" href="tools.css?v=10">
@@ -64,10 +63,10 @@
                         </div>
                         <div class="field-label">AI Engine</div>
                         <div class="thesis-modes" style="margin-bottom:20px">
-                            <button class="mode-btn active" onclick="setSolverModel(this,'gemini-2.0-flash')">Gemini 2.0</button>
-                            <button class="mode-btn" onclick="setSolverModel(this,'claude-3-5-sonnet')">Claude 3.5</button>
-                            <button class="mode-btn" onclick="setSolverModel(this,'gpt-4o')">GPT-4o</button>
-                            <button class="mode-btn" onclick="setSolverModel(this,'deepseek-v3')">DeepSeek V3</button>
+                            <button class="mode-btn active" onclick="setSolverModel(this,'opencode/claude-3-5-sonnet')">Claude 3.5</button>
+                            <button class="mode-btn" onclick="setSolverModel(this,'opencode/gpt-4o')">GPT-4o</button>
+                            <button class="mode-btn" onclick="setSolverModel(this,'opencode/deepseek-v3')">DeepSeek V3</button>
+                            <button class="mode-btn" onclick="setSolverModel(this,'opencode/deepseek-v4-flash-free')">DeepSeek Free</button>
                         </div>
                         <div class="solver-options">
                             <label class="option-check">
@@ -294,32 +293,31 @@
             
             <div class="input-wrapper" style="margin-bottom: 20px;">
                 <label class="field-label">AI Provider</label>
-                <select id="settingProvider" class="ai-textarea" style="min-height: 45px; padding: 0 12px;">
-                    <option value="puter">Puter.js (Free / Cloud AI)</option>
-                    <option value="direct-google">Google API (Direct Key)</option>
-                    <option value="direct-anthropic">Anthropic API (Direct Key)</option>
+                <select id="settingProvider" class="ai-textarea" style="min-height: 45px; padding: 0 12px;" onchange="toggleProviderFields()">
+                    <option value="opencode">OpenCode Zen (Recommended)</option>
+                    <option value="anthropic">Anthropic (Direct Key)</option>
                 </select>
             </div>
 
-            <div class="input-wrapper" style="margin-bottom: 20px;">
-                <label class="field-label">Anthropic API Key (Claude)</label>
-                <input type="password" id="settingAnthropicKey" class="ai-textarea" style="min-height: 45px;" placeholder="sk-ant-...">
-                <small style="color:var(--text-dim); font-size:11px">Required for Direct Claude access</small>
+            <div id="opencodeKeyGroup" class="input-wrapper" style="margin-bottom: 20px;">
+                <label class="field-label">OpenCode Zen API Key</label>
+                <input type="password" id="settingOpencodeKey" class="ai-textarea" style="min-height: 45px;" placeholder="opencode-...">
+                <small style="color:var(--text-dim); font-size:11px">Get your key from opencode.ai/zen</small>
             </div>
 
-            <div class="input-wrapper" style="margin-bottom: 20px;">
-                <label class="field-label">Gemini API Key</label>
-                <input type="password" id="settingGeminiKey" class="ai-textarea" style="min-height: 45px;" placeholder="AIzaSy...">
-                <small style="color:var(--text-dim); font-size:11px">Get a free key from Google AI Studio</small>
+            <div id="anthropicKeyGroup" class="input-wrapper" style="margin-bottom: 20px; display:none">
+                <label class="field-label">Anthropic API Key</label>
+                <input type="password" id="settingAnthropicKey" class="ai-textarea" style="min-height: 45px;" placeholder="sk-ant-...">
+                <small style="color:var(--text-dim); font-size:11px">Enter your Claude API key</small>
             </div>
 
             <div class="input-wrapper" style="margin-bottom: 24px;">
                 <label class="field-label">Preferred Model</label>
                 <select id="settingModel" class="ai-textarea" style="min-height: 45px; padding: 0 12px;">
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                    <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
-                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="opencode/claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+                    <option value="opencode/gpt-4o">GPT-4o</option>
+                    <option value="opencode/deepseek-v3">DeepSeek V3</option>
+                    <option value="opencode/deepseek-v4-flash-free">DeepSeek V4 (FREE)</option>
                 </select>
             </div>
 
@@ -337,6 +335,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <script src="config.js?v=1"></script>
+    <script src="keys.js?v=1"></script>
     <script src="supabase-config.js?v=2"></script>
     <script src="auth.js?v=2"></script>
     <script src="database.js?v=2"></script>

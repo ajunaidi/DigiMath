@@ -8,8 +8,8 @@ let lastSolution = '';
 let lastOCRLatex = '';
 let lastThesisContent = '';
 let currentThesisMode = 'abstract';
-let currentSolverModel = 'gemini-2.0-flash';
-let currentResearchModel = 'gemini-2.0-flash';
+let currentSolverModel = 'claude-3-5-sonnet-20240620';
+let currentResearchModel = 'claude-3-5-sonnet-20240620';
 let currentResearchTopic = '';
 let uploadedImageBase64 = '';
 let uploadedImageMime = '';
@@ -254,7 +254,7 @@ async function runOCRCloud() {
   }
 
   try {
-    const result = await GeminiAI.vision(uploadedImageBase64, uploadedImageMime, prompt);
+    const result = await DigiMathAI.vision(uploadedImageBase64, uploadedImageMime, prompt);
     lastOCRLatex = result;
     output.innerHTML = formatAIResponse(result);
     if (window.renderMathInElement) {
@@ -387,7 +387,7 @@ async function explainCalc() {
   entry.innerHTML = `<div style="font-size:12px;color:var(--accent-primary);margin-bottom:8px">AI Explanation Request...</div>`;
   out.prepend(entry);
   try {
-    const result = await GeminiAI.gemini(`You are a math professor. Explain this clearly for an MSc student: "${q}". Use simple language with examples. Include LaTeX ($$...$$) where helpful.`);
+    const result = await DigiMathAI.gemini(`You are a math professor. Explain this clearly for an MSc student: "${q}". Use simple language with examples. Include LaTeX ($$...$$) where helpful.`);
     entry.innerHTML = `<div style="padding:10px;background:rgba(255,255,255,0.05);border-radius:8px">${formatAIResponse(result)}</div>`;
     if (window.renderMathInElement) {
         renderMathInElement(entry, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
@@ -431,7 +431,7 @@ async function runThesis() {
   };
 
   try {
-    const result = await GeminiAI.gemini(prompts[currentThesisMode] || prompts.abstract);
+    const result = await DigiMathAI.gemini(prompts[currentThesisMode] || prompts.abstract);
     lastThesisContent = result;
     output.innerHTML = formatAIResponse(result);
     if (window.renderMathInElement) {
@@ -459,7 +459,7 @@ async function summarizeDoc() {
   const out = document.getElementById('docOutput');
   out.innerHTML = '<div class="output-placeholder"><div>⏳ AI is reading...</div></div>';
   try {
-    const result = await GeminiAI.gemini(`Summarize the following academic text/document for an MSc student. Highlight key findings, methodology, and conclusions. Use LaTeX ($$...$$) for any equations. Text: "${text.substring(0, 5000)}"`);
+    const result = await DigiMathAI.gemini(`Summarize the following academic text/document for an MSc student. Highlight key findings, methodology, and conclusions. Use LaTeX ($$...$$) for any equations. Text: "${text.substring(0, 5000)}"`);
     lastDocSummary = result;
     out.innerHTML = formatAIResponse(result);
     if (window.renderMathInElement) {
@@ -509,7 +509,7 @@ async function askAIAboutWiki(title, context) {
   aiOut.style.display = '';
   aiOut.innerHTML = '<div class="output-placeholder"><div>⏳ AI thinking...</div></div>';
   try {
-    const result = await GeminiAI.gemini(`You are an expert MSc-level math research assistant. Use this Wikipedia summary of "${title}" as context: "${context}". Please provide a deep academic explanation or solve the requested problems. Use LaTeX equations ($$...$$).`);
+    const result = await DigiMathAI.gemini(`You are an expert MSc-level math research assistant. Use this Wikipedia summary of "${title}" as context: "${context}". Please provide a deep academic explanation or solve the requested problems. Use LaTeX equations ($$...$$).`);
     aiOut.innerHTML = formatAIResponse(result);
     if (window.renderMathInElement) {
         renderMathInElement(aiOut, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
@@ -526,7 +526,7 @@ async function askResearchAI() {
   aiOut.style.display = '';
   aiOut.innerHTML = '<div class="output-placeholder"><div>⏳ AI thinking...</div></div>';
   try {
-    const result = await GeminiAI.gemini(`You are an expert MSc-level mathematics research assistant. Answer this thoroughly: "${q}". Include LaTeX equations ($$...$$) and markdown formatting. Be detailed and accurate.`);
+    const result = await DigiMathAI.gemini(`You are an expert MSc-level mathematics research assistant. Answer this thoroughly: "${q}". Include LaTeX equations ($$...$$) and markdown formatting. Be detailed and accurate.`);
     aiOut.innerHTML = formatAIResponse(result);
     if (window.renderMathInElement) {
         renderMathInElement(aiOut, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
@@ -633,17 +633,27 @@ async function runNewton(operation) {
 
 function openSettings() {
   const s = DigiMathSettings.get();
-  document.getElementById('settingProvider').value = s.provider;
-  document.getElementById('settingGeminiKey').value = s.geminiKey || '';
-  document.getElementById('settingAnthropicKey').value = s.anthropicKey || '';
-  document.getElementById('settingModel').value = s.model;
+  if (document.getElementById('settingProvider')) document.getElementById('settingProvider').value = s.provider || 'opencode';
+  if (document.getElementById('settingOpencodeKey')) document.getElementById('settingOpencodeKey').value = s.opencodeKey || '';
+  if (document.getElementById('settingAnthropicKey')) document.getElementById('settingAnthropicKey').value = s.anthropicKey || '';
+  if (document.getElementById('settingModel')) document.getElementById('settingModel').value = s.model;
+  toggleProviderFields();
   showModal('settingsModal');
+}
+
+function toggleProviderFields() {
+  const provider = document.getElementById('settingProvider').value;
+  const ocGroup = document.getElementById('opencodeKeyGroup');
+  const anGroup = document.getElementById('anthropicKeyGroup');
+  
+  if (ocGroup) ocGroup.style.display = provider === 'opencode' ? 'block' : 'none';
+  if (anGroup) anGroup.style.display = provider === 'anthropic' ? 'block' : 'none';
 }
 
 function saveSettings() {
   const data = {
     provider: document.getElementById('settingProvider').value,
-    geminiKey: document.getElementById('settingGeminiKey').value,
+    opencodeKey: document.getElementById('settingOpencodeKey').value,
     anthropicKey: document.getElementById('settingAnthropicKey').value,
     model: document.getElementById('settingModel').value
   };
