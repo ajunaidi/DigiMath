@@ -465,9 +465,30 @@ async function handleSaveAssignment(e) {
   } catch (err) { showToast('❌ ' + err.message); }
 }
 
+function openSettings() {
+  const s = DigiMathSettings.get();
+  document.getElementById('settingProvider').value = s.provider;
+  document.getElementById('settingGeminiKey').value = s.geminiKey;
+  document.getElementById('settingModel').value = s.model;
+  showModal('settingsModal');
+}
+
+function saveSettings() {
+  const data = {
+    provider: document.getElementById('settingProvider').value,
+    geminiKey: document.getElementById('settingGeminiKey').value,
+    model: document.getElementById('settingModel').value
+  };
+  DigiMathSettings.save(data);
+  hideModal('settingsModal');
+  showToast('✅ Settings saved! Reloading...');
+  setTimeout(() => window.location.reload(), 1000);
+}
+
 let _toastTimeout;
 function showToast(msg) {
   const el = document.getElementById('toast');
+  if (!el) return;
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(_toastTimeout);

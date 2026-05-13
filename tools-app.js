@@ -630,12 +630,36 @@ async function runNewton(operation) {
   }
 }
 
+function openSettings() {
+  const s = DigiMathSettings.get();
+  document.getElementById('settingProvider').value = s.provider;
+  document.getElementById('settingGeminiKey').value = s.geminiKey;
+  document.getElementById('settingModel').value = s.model;
+  showModal('settingsModal');
+}
+
+function saveSettings() {
+  const data = {
+    provider: document.getElementById('settingProvider').value,
+    geminiKey: document.getElementById('settingGeminiKey').value,
+    model: document.getElementById('settingModel').value
+  };
+  DigiMathSettings.save(data);
+  hideModal('settingsModal');
+  showToast('✅ Settings saved! Reloading...');
+  setTimeout(() => window.location.reload(), 1000);
+}
+
+function showModal(id) { document.getElementById(id).classList.add('active'); }
+function hideModal(id) { document.getElementById(id).classList.remove('active'); }
+
 // ========================
 //  Toast
 // ========================
 let _t;
 function showToast(msg) {
   const el = document.getElementById('toast');
+  if (!el) return;
   el.textContent = msg; el.classList.add('show');
   clearTimeout(_t); _t = setTimeout(() => el.classList.remove('show'), 3000);
 }
