@@ -161,6 +161,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('aiMagicBtn');
     const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    
+    // Check if it's a solvable math problem first
+    if (text.includes('=') || text.match(/[+\-*/^]/)) {
+        try {
+            const result = math.evaluate(text.replace(/\\/g, ''));
+            latexInput.value = text + ' = ' + result;
+            renderLatex(latexInput.value);
+            showToast('✨ Solved Locally!');
+            btn.innerHTML = originalContent;
+            return;
+        } catch(e) { /* fallback to AI */ }
+    }
+
     try {
       const result = await _aiCall({ contents: [{ parts: [{ text: `Convert this natural language math into LaTeX code: "${text}". Output ONLY the LaTeX code (no explanation). Use $$...$$ for the main equation.` }] }] });
       const cleanLatex = result.match(/\$\$([\s\S]+?)\$\$/)?.[1] || result.replace(/\$/g, '').trim();

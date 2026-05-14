@@ -591,21 +591,23 @@ async function runNewton(operation) {
   const expr = document.getElementById('newtonInput').value.trim();
   if (!expr) { showToast('⚠️ Enter an expression'); return; }
   const output = document.getElementById('newtonOutput');
-  output.innerHTML = '<div class="output-placeholder"><div>⏳ Calculating...</div></div>';
+  output.innerHTML = '<div class="output-placeholder"><div>⏳ Calculating locally...</div></div>';
 
   try {
-    const data = await MathAPIs.newton(operation, expr);
+    // Using local solve engine instead of external API
+    const data = await MathAPIs.solveLocal(operation, expr);
     const opNames = {
       simplify: 'Simplify', factor: 'Factor', derive: 'Derivative',
       integrate: 'Integral', zeroes: 'Zeros', cos: 'Cosine',
-      sin: 'Sine', tan: 'Tangent', log: 'Logarithm', abs: 'Absolute Value'
+      sin: 'Sine', tan: 'Tangent', log: 'Logarithm', abs: 'Absolute Value',
+      evaluate: 'Evaluate'
     };
 
     output.innerHTML = `
-      <h2>⚡ ${opNames[operation] || operation}</h2>
+      <h2>⚡ ${opNames[operation] || operation} (Local)</h2>
       <div class="step-block"><strong>Input:</strong> <code>${data.expression}</code></div>
-      <div class="step-block" style="border-left-color:var(--accent2);margin-top:12px">
-        <strong>Result:</strong> <code style="font-size:18px;color:var(--accent2)">${data.result}</code>
+      <div class="step-block" style="border-left-color:var(--accent-primary);margin-top:12px">
+        <strong>Result:</strong> <code style="font-size:18px;color:var(--accent-secondary)">${data.result}</code>
       </div>
       <br>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -615,18 +617,26 @@ async function runNewton(operation) {
     `;
 
     // Try to render as LaTeX
-    const latexResult = data.result.toString()
+    let latexResult = data.result.toString()
       .replace(/\*/g, ' \\cdot ')
       .replace(/\^/g, '^')
       .replace(/sqrt/g, '\\sqrt');
+    
+    // Add display mode brackets for KaTeX
+    if (!latexResult.includes('$$')) latexResult = '$$' + latexResult + '$$';
+
     const previewEl = document.getElementById('newtonMathPreview');
     const previewBox = document.getElementById('newtonLatexPreview');
     previewBox.style.display = '';
-    try { katex.render(latexResult, previewEl, { displayMode: true, throwOnError: false }); } catch(e) { previewEl.textContent = data.result; }
+    try { 
+      katex.render(latexResult.replace(/\$\$/g, ''), previewEl, { displayMode: true, throwOnError: false }); 
+    } catch(e) { 
+      previewEl.textContent = data.result; 
+    }
 
-    showToast('✅ ' + opNames[operation] + ' complete!');
+    showToast('✅ ' + (opNames[operation] || 'Calculation') + ' complete!');
   } catch (err) {
-    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}<br><br><small>Make sure your expression uses <strong>x</strong> as variable. Example: x^2 + 2x + 1</small></div>`;
+    output.innerHTML = `<div style="color:var(--danger);padding:16px">❌ Error: ${err.message}<br><br><small>Make sure your expression is valid. Example: x^2 + 2x + 1</small></div>`;
     showToast('❌ ' + err.message);
   }
 }

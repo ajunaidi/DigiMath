@@ -48,14 +48,35 @@ const VoiceInput = (() => {
     recognition.onresult = (event) => {
       let finalT = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) finalT += event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+            let transcript = event.results[i][0].transcript;
+            // MATH CONVERSION LOGIC (Local)
+            transcript = transcript.toLowerCase()
+              .replace(/\bintegral\b/g, '\\int')
+              .replace(/\bsum\b/g, '\\sum')
+              .replace(/\balpha\b/g, '\\alpha')
+              .replace(/\bbeta\b/g, '\\beta')
+              .replace(/\bgamma\b/g, '\\gamma')
+              .replace(/\btheta\b/g, '\\theta')
+              .replace(/\bpi\b/g, '\\pi')
+              .replace(/\bsquare root of\b/g, '\\sqrt{')
+              .replace(/\bsquare root\b/g, '\\sqrt{')
+              .replace(/\binfinity\b/g, '\\infty')
+              .replace(/\bdivided by\b/g, '/')
+              .replace(/\btimes\b/g, '*')
+              .replace(/\bplus\b/g, '+')
+              .replace(/\bminus\b/g, '-')
+              .replace(/\bequals\b/g, '=');
+            
+            finalT += transcript;
+        }
       }
       if (finalT && targetElement) {
         // Add space if there is already text
         targetElement.value += (targetElement.value && !targetElement.value.endsWith(' ') ? ' ' : '') + finalT;
         // Trigger input event to update any listeners
         targetElement.dispatchEvent(new Event('input', { bubbles: true }));
-        showVoiceToast('✅ Text added: "' + finalT.substring(0, 40) + '..."');
+        showVoiceToast('✅ Added: "' + finalT.substring(0, 40) + '..."');
       }
     };
   }
