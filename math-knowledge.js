@@ -48,6 +48,26 @@ const MATH_DIRECTORY = [
   {
     pattern: /divergence theorem|gauss theorem/i,
     solution: "The Divergence Theorem:\n$$\\iiint_V (\\nabla \\cdot \\mathbf{F}) dV = \\iint_{\\partial V} \\mathbf{F} \\cdot d\\mathbf{S}$$"
+  },
+  {
+    pattern: /taylor series|taylor expansion/i,
+    solution: "The Taylor Series of a function $f(x)$ at $a$ is:\n$$f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!}(x-a)^n$$"
+  },
+  {
+    pattern: /fourier transform|ft/i,
+    solution: "The Continuous Fourier Transform is defined as:\n$$\\hat{f}(\\xi) = \\int_{-\\infty}^{\\infty} f(x) e^{-2\\pi i x \\xi} dx$$"
+  },
+  {
+    pattern: /laplace transform/i,
+    solution: "The Laplace Transform is defined as:\n$$\\mathcal{L}\\{f(t)\\} = \\int_{0}^{\\infty} e^{-st} f(t) dt$$"
+  },
+  {
+    pattern: /green's theorem|greens theorem/i,
+    solution: "Green's Theorem:\n$$\\oint_C (P dx + Q dy) = \\iint_D \\left( \\frac{\\partial Q}{\\partial x} - \\frac{\\partial P}{\\partial y} \\right) dA$$"
+  },
+  {
+    pattern: /cauchy-riemann|cr equations/i,
+    solution: "Cauchy-Riemann Equations for a complex function $f(z) = u + iv$:\n$$\\frac{\\partial u}{\\partial x} = \\frac{\\partial v}{\\partial y}, \\quad \\frac{\\partial u}{\\partial y} = -\\frac{\\partial v}{\\partial x}$$"
   }
 ];
 

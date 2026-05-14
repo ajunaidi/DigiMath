@@ -285,6 +285,75 @@ body::after {
   box-shadow: 0 0 0 4px var(--accent-glow);
 }
 
+/* Math Palette (MathType Style) */
+.math-palette {
+  margin-top: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.palette-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.palette-tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: var(--transition-base);
+  border-right: 1px solid var(--border-glass);
+}
+
+.palette-tab:last-child { border-right: none; }
+
+.palette-tab.active {
+  color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.palette-content {
+  display: none;
+  padding: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 6px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.palette-content.active { display: grid; }
+
+.palette-content button {
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-base);
+}
+
+.palette-content button:hover {
+  background: var(--accent-glow);
+  border-color: var(--accent-primary);
+  transform: scale(1.1);
+  z-index: 10;
+}
+
+.palette-content button sub, .palette-content button sup { font-size: 10px; }
+
 /* Preview Window */
 .preview-window {
   background: rgba(0, 0, 0, 0.2);

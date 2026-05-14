@@ -8,10 +8,10 @@ const getSettings = () => {
     const saved = localStorage.getItem('digimath_settings');
     const localKeys = window.DIGIMATH_KEYS || {};
     const defaults = {
-        anthropicKey: localKeys.ANTHROPIC_API_KEY || '', 
-        opencodeKey: localKeys.OPENCODE_ZEN_KEY || '', 
-        provider: 'opencode', 
-        model: 'opencode/claude-3-5-sonnet'
+        anthropicKey: '', 
+        opencodeKey: '', 
+        provider: 'local', 
+        model: 'local'
     };
     return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
 };
@@ -94,8 +94,30 @@ async function _aiCall(body, options = {}) {
             throw err;
         }
     }
+    // --- 3. LOCAL ENGINE (FREE & SMART) ---
+    if (provider === 'local') {
+        const prompt = body.contents[0].parts.find(p => p.text)?.text || '';
+        
+        // Check Knowledge Directory first
+        const localMatch = window.MathDirectory ? window.MathDirectory.find(prompt) : null;
+        if (localMatch) {
+            showStatus('✨ Local Intelligence match found...');
+            return localMatch;
+        }
+
+        // Try symbolic solving with Math.js
+        try {
+            showStatus('🧬 Computing with Local Math.js...');
+            // Simple cleaning of prompt to extract equation
+            const expr = prompt.replace(/solve|simplify|evaluate|convert/gi, '').replace(/this/gi, '').trim();
+            const result = await window.MathAPIs.solveLocal('simplify', expr);
+            return `### Local Analysis Result\n\n**Expression:** $${expr}$$\n**Result:** $${result.result}$$\n\n*Note: Using Local Symbolic Engine. For deep PhD-level reasoning, add an API key in Settings.*`;
+        } catch (e) {
+            return `### Intelligence Insight\n\nI am currently in **Local Mode**. I can solve symbolic math (like derivatives or simplification) and identify standard theorems.\n\n**To solve this specific complex problem:**\n1. Try simplifying the expression.\n2. Ensure it's in standard math notation (e.g., x^2 + 2x + 1).\n3. Or, add a free API key in Settings for cloud-level reasoning.`;
+        }
+    }
     
-    throw new Error('Please enter an API Key in Settings to enable AI features.');
+    throw new Error('Please select an Intelligence Mode in Settings.');
 }
 
 const AI = {

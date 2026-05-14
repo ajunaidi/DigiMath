@@ -61,6 +61,32 @@
                             <textarea id="solverInput" class="ai-textarea" style="min-height:200px" placeholder="e.g. Solve the differential equation y'' + 4y = sin(2x)..."></textarea>
                             <button class="inline-mic-btn" onclick="VoiceInput.toggleInline(this, 'solverInput')"><i class="fa-solid fa-microphone"></i></button>
                         </div>
+                        
+                        <!-- Math Palette for Solver -->
+                        <div class="math-palette" style="margin-top:16px; margin-bottom:24px">
+                            <div class="palette-tabs">
+                                <button class="palette-tab active" data-tab="basic-s" onclick="switchPalette(this)">Basic</button>
+                                <button class="palette-tab" data-tab="greek-s" onclick="switchPalette(this)">Greek</button>
+                                <button class="palette-tab" data-tab="advanced-s" onclick="switchPalette(this)">Advanced</button>
+                                <button class="palette-tab" data-tab="struct-s" onclick="switchPalette(this)">Struct</button>
+                            </div>
+                            <div class="palette-content active" id="palette-basic-s">
+                                <button onclick="insertSymbolInto('solverInput','\\pm')">±</button> <button onclick="insertSymbolInto('solverInput','\\times')">×</button> 
+                                <button onclick="insertSymbolInto('solverInput','\\div')">÷</button> <button onclick="insertSymbolInto('solverInput','\\infty')">∞</button>
+                                <button onclick="insertSymbolInto('solverInput','\\sqrt{}')">√</button> <button onclick="insertSymbolInto('solverInput','\\pi')">π</button>
+                            </div>
+                            <div class="palette-content" id="palette-greek-s">
+                                <button onclick="insertSymbolInto('solverInput','\\alpha')">α</button> <button onclick="insertSymbolInto('solverInput','\\beta')">β</button>
+                                <button onclick="insertSymbolInto('solverInput','\\theta')">θ</button> <button onclick="insertSymbolInto('solverInput','\\Delta')">Δ</button>
+                            </div>
+                            <div class="palette-content" id="palette-advanced-s">
+                                <button onclick="insertSymbolInto('solverInput','\\int')">∫</button> <button onclick="insertSymbolInto('solverInput','\\sum')">Σ</button>
+                                <button onclick="insertSymbolInto('solverInput','\\partial')">∂</button> <button onclick="insertSymbolInto('solverInput','\\nabla')">∇</button>
+                            </div>
+                            <div class="palette-content" id="palette-struct-s">
+                                <button onclick="insertSymbolInto('solverInput','\\frac{}{}')">⁄</button> <button onclick="insertSymbolInto('solverInput','\\int_{}^{}')">∫<sub>a</sub><sup>b</sup></button>
+                            </div>
+                        </div>
                         <div class="field-label">AI Engine</div>
                         <div class="thesis-modes" style="margin-bottom:20px">
                             <button class="mode-btn active" onclick="setSolverModel(this,'opencode/claude-opus-4-7')">Claude 4.7</button>
@@ -161,26 +187,33 @@
                     <p class="modal-subtitle">Symbolic math, matrix algebra, and statistics.</p>
                 </div>
                 <div class="workspace-grid">
-                    <div class="editor-panel">
-                        <div class="field-label">Quick Expression</div>
-                        <div class="input-wrapper">
-                            <input type="text" id="calcInput" class="ai-textarea" style="min-height:60px" placeholder="e.g. det([1,2;3,4]) or mean(1,2,3,4)">
+                        <div class="field-label">Matrix Operations</div>
+                        <div class="input-wrapper" style="margin-bottom:12px">
+                            <textarea id="matrixInput" class="ai-textarea" style="min-height:100px" placeholder="e.g. 1, 2; 3, 4"></textarea>
                         </div>
-                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:20px">
-                            <button class="btn btn-secondary" style="padding:10px" onclick="insertCalc('sin(')">sin</button>
-                            <button class="btn btn-secondary" style="padding:10px" onclick="insertCalc('cos(')">cos</button>
-                            <button class="btn btn-secondary" style="padding:10px" onclick="insertCalc('tan(')">tan</button>
-                            <button class="btn btn-secondary" style="padding:10px" onclick="insertCalc('sqrt(')">sqrt</button>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px">
+                            <select id="matrixOp" class="ai-textarea" style="min-height:45px; padding:0 12px">
+                                <option value="det(A)">Determinant</option>
+                                <option value="inv(A)">Inverse</option>
+                                <option value="transpose(A)">Transpose</option>
+                                <option value="rank(A)">Rank</option>
+                                <option value="eig(A)">Eigenvalues</option>
+                            </select>
+                            <button class="btn btn-secondary" onclick="calcMatrix()">Compute</button>
                         </div>
-                        <button class="btn btn-primary" id="calcBtn" style="width:100%; margin-top:20px" onclick="calculate()">
-                            <span id="calcBtnText">🧮 Compute</span>
-                        </button>
+                        <div id="matrixOutput" class="ai-output" style="display:none; font-family:monospace; background:rgba(0,0,0,0.4)"></div>
                     </div>
                     <div class="editor-panel">
-                        <div class="field-label">History & Result</div>
-                        <div class="ai-output" id="calcHistory">
-                            <div style="color:var(--text-dim)"><i class="fa-solid fa-clock-rotate-left"></i> History will appear here...</div>
+                        <div class="field-label">Statistical Analysis</div>
+                        <div class="input-wrapper" style="margin-bottom:12px">
+                            <input type="text" id="statsInput" class="ai-textarea" style="min-height:60px" placeholder="e.g. 12, 45, 67, 23, 89">
                         </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px">
+                            <button class="btn btn-secondary" style="font-size:12px" onclick="calcStats('mean')">Mean</button>
+                            <button class="btn btn-secondary" style="font-size:12px" onclick="calcStats('std')">Std Dev</button>
+                            <button class="btn btn-secondary" style="font-size:12px" onclick="calcStats('all')">Full Profile</button>
+                        </div>
+                        <div id="statsOutput" class="ai-output" style="display:none; font-family:monospace; white-space:pre"></div>
                     </div>
                 </div>
             </div>
@@ -257,15 +290,21 @@
                 </div>
                 <div class="workspace-grid">
                     <div class="editor-panel">
-                        <div class="field-label">Search Topic</div>
+                        <div class="field-label">Search World Research (ArXiv + Wikipedia)</div>
                         <div class="input-wrapper" style="margin-bottom:20px">
-                            <input type="text" id="wikiInput" class="ai-textarea" style="min-height:60px" placeholder="e.g. Quantum Mechanics, Riemann Hypothesis...">
-                            <button class="btn btn-primary" id="wikiBtn" style="position:absolute; right:8px; top:8px; padding:12px 24px" onclick="searchWiki()">
+                            <input type="text" id="wikiInput" class="ai-textarea" style="min-height:60px" placeholder="Search for research papers, theorems, or topics...">
+                            <button class="btn btn-primary" id="wikiBtn" style="position:absolute; right:8px; top:8px; padding:12px 24px" onclick="searchGlobalResearch()">
                                 <span id="wikiBtnText">Search</span>
                             </button>
                         </div>
-                        <div id="wikiResult" class="ai-output" style="min-height:200px">
-                            <div style="color:var(--text-dim)"><i class="fa-solid fa-magnifying-glass"></i> Search results will appear here...</div>
+                        
+                        <div class="research-tabs" style="display:flex; gap:10px; margin-bottom:16px">
+                            <button class="mode-btn active" id="btnArxiv" onclick="toggleResearchSource('arxiv')">ArXiv Papers</button>
+                            <button class="mode-btn" id="btnWiki" onclick="toggleResearchSource('wiki')">Wikipedia</button>
+                        </div>
+
+                        <div id="researchResult" class="ai-output" style="min-height:300px; max-height:500px; overflow-y:auto">
+                            <div style="color:var(--text-dim)"><i class="fa-solid fa-magnifying-glass"></i> World research database results will appear here...</div>
                         </div>
                     </div>
                     <div class="editor-panel">
@@ -283,48 +322,37 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- Admin Settings Modal -->
+    <!-- Workspace Settings Modal (Free Mode) -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content" style="max-width: 500px;">
             <div style="margin-bottom: 24px; text-align: center;">
-                <h2 style="font-size: 22px; font-family: 'Outfit', sans-serif;"><i class="fa-solid fa-gears"></i> AI <span class="gradient-text">Settings</span></h2>
-                <p style="color: var(--text-dim); font-size: 13px;">Manage your API keys and AI preferences</p>
+                <h2 style="font-size: 22px; font-family: 'Outfit', sans-serif;"><i class="fa-solid fa-leaf"></i> Workspace <span class="gradient-text">Settings</span></h2>
+                <p style="color: var(--text-dim); font-size: 13px;">Manage your local math workspace preferences</p>
             </div>
             
             <div class="input-wrapper" style="margin-bottom: 20px;">
-                <label class="field-label">AI Provider</label>
-                <select id="settingProvider" class="ai-textarea" style="min-height: 45px; padding: 0 12px;" onchange="toggleProviderFields()">
-                    <option value="opencode">OpenCode Zen (Recommended)</option>
-                    <option value="anthropic">Anthropic (Direct Key)</option>
+                <label class="field-label">Intelligence Mode</label>
+                <select id="settingProvider" class="ai-textarea" style="min-height: 45px; padding: 0 12px;">
+                    <option value="local">Local Engine (Always Free & Fast)</option>
                 </select>
+                <small style="color:var(--accent-primary); font-size:11px">✨ Using local Math.js + ArXiv database</small>
             </div>
 
-            <div id="opencodeKeyGroup" class="input-wrapper" style="margin-bottom: 20px;">
-                <label class="field-label">OpenCode Zen API Key</label>
-                <input type="password" id="settingOpencodeKey" class="ai-textarea" style="min-height: 45px;" placeholder="opencode-...">
-                <small style="color:var(--text-dim); font-size:11px">Get your key from opencode.ai/zen</small>
+            <div id="opencodeKeyGroup" style="display:none">
+                <input type="password" id="settingOpencodeKey">
+                <input type="password" id="settingAnthropicKey">
+                <select id="settingModel"><option value="local">Local</option></select>
             </div>
 
-            <div id="anthropicKeyGroup" class="input-wrapper" style="margin-bottom: 20px; display:none">
-                <label class="field-label">Anthropic API Key</label>
-                <input type="password" id="settingAnthropicKey" class="ai-textarea" style="min-height: 45px;" placeholder="sk-ant-...">
-                <small style="color:var(--text-dim); font-size:11px">Enter your Claude API key</small>
-            </div>
-
-            <div class="input-wrapper" style="margin-bottom: 24px;">
-                <label class="field-label">Preferred Model</label>
-                <select id="settingModel" class="ai-textarea" style="min-height: 45px; padding: 0 12px;">
-                    <option value="opencode/claude-opus-4-7">Claude 4.7 Opus (Elite)</option>
-                    <option value="opencode/gpt-5.5">GPT-5.5 (Supreme)</option>
-                    <option value="opencode/gemini-3.1-pro">Gemini 3.1 Pro</option>
-                    <option value="opencode/deepseek-v4-flash-free">DeepSeek V4 (FREE)</option>
-                    <option value="opencode/trinity-large-preview-free">Trinity Large (FREE)</option>
-                </select>
+            <div style="background:rgba(99, 102, 241, 0.05); padding:16px; border-radius:12px; border:1px solid var(--border-glass); margin-bottom:24px">
+                <div style="font-size:12px; color:var(--text-sub); line-height:1.4">
+                    <i class="fa-solid fa-shield-halved"></i> <strong>Privacy Guard Active:</strong> All calculations and voice data stay on your device. No paid subscriptions required.
+                </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <button class="btn btn-secondary" onclick="hideModal('settingsModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+                <button class="btn btn-secondary" onclick="hideModal('settingsModal')">Close</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save & Optimize</button>
             </div>
         </div>
     </div>
@@ -341,7 +369,7 @@
     <script src="auth.js?v=2"></script>
     <script src="database.js?v=2"></script>
     <script src="math-knowledge.js?v=1"></script>
-    <script src="gemini-config.js?v=8"></script>
+    <script src="ai-config.js?v=9"></script>
     <script src="math-apis.js?v=1"></script>
     <script src="voice-global.js?v=2"></script>
     <script src="tools-app.js?v=13"></script>

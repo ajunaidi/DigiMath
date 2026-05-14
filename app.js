@@ -130,21 +130,68 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  function renderLatex(latex) {
+  window.renderLatex = function(latex) {
     if (!latex || !latex.trim()) {
       previewArea.innerHTML = '<div class="preview-placeholder">Your rendered equation will appear here</div>';
-      latexCode.textContent = '—';
+      if (latexCode) latexCode.textContent = '—';
       currentLatex = '';
       return;
     }
     currentLatex = latex.trim();
-    latexCode.textContent = currentLatex;
+    if (latexCode) latexCode.textContent = currentLatex;
+    
+    if (!window.katex) {
+      previewArea.innerHTML = `<div style="color:var(--text-sub)">⌛ Loading engine...</div>`;
+      return;
+    }
+
     try {
       katex.render(currentLatex, previewArea, { displayMode: true, throwOnError: false, trust: true, strict: false });
+      
+      // Smart Graphing: If it looks like a function (has x and some math operators)
+      const cleanFn = currentLatex.replace(/\\/g, '').replace(/[\{\}]/g, '');
+      if (cleanFn.includes('x') && (cleanFn.includes('^') || cleanFn.includes('*') || cleanFn.includes('+') || cleanFn.includes('-') || cleanFn.match(/[a-z]+\(/))) {
+          renderGraph(cleanFn);
+      }
     } catch (e) {
       previewArea.innerHTML = `<div style="color:var(--danger);font-size:14px;">Error: ${e.message}</div>`;
     }
   }
+
+  function renderGraph(fn) {
+    if (!window.functionPlot) return;
+    const target = document.getElementById('graphArea');
+    if (!target) return;
+    target.innerHTML = ''; // Clear previous graph
+    try {
+      functionPlot({
+        target: '#graphArea',
+        width: target.clientWidth || 500,
+        height: 240,
+        grid: true,
+        data: [{ fn: fn.replace(/\^/g, '**'), color: '#6366f1' }]
+      });
+    } catch(e) {
+      console.error('Graph Error:', e);
+    }
+  }
+
+  window.exportToPDF = async function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const latex = latexInput.value || 'No equation';
+    
+    doc.setFontSize(22);
+    doc.text('DigiMath Research Document', 20, 20);
+    doc.setFontSize(12);
+    doc.text('Date: ' + new Date().toLocaleString(), 20, 30);
+    doc.text('Equation:', 20, 45);
+    doc.setFont('courier');
+    doc.text(latex, 20, 55);
+    
+    doc.save(`digimath-${Date.now()}.pdf`);
+    showToast('✅ PDF exported!');
+  };
 
   // Check URL params for preloaded latex
   const urlParams = new URLSearchParams(window.location.search);
@@ -197,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================
   //  Save Equation
   // ========================
-  document.getElementById('saveBtn').addEventListener('click', async () => {
+  window.saveEquation = async function() {
     if (!currentLatex) { showToast('⚠️ No equation'); return; }
     try {
       const title = prompt('Equation title (optional):', '') || 'Untitled';
@@ -205,13 +252,14 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('💾 Equation saved!');
       loadSavedEquations();
     } catch (err) { showToast('❌ ' + err.message); }
-  });
+  };
 
   // ========================
   //  Load Saved Equations
   // ========================
   async function loadSavedEquations() {
     const grid = document.getElementById('savedGrid');
+    if (!grid) return;
     try {
       const equations = await DB.getEquations();
       if (!equations.length) {
@@ -241,10 +289,13 @@ document.addEventListener('DOMContentLoaded', () => {
           e.stopPropagation();
           latexInput.value = eq.latex;
           renderLatex(eq.latex);
-          tabs.forEach(t => t.classList.remove('active'));
-          Object.values(tabContents).forEach(c => c.classList.remove('active'));
-          document.getElementById('tabLatex').classList.add('active');
-          tabContents['latex'].classList.add('active');
+          if (tabs.length) {
+              tabs.forEach(t => t.classList.remove('active'));
+              Object.values(tabContents).forEach(c => c.classList.remove('active'));
+              const tabLatex = document.getElementById('tabLatex');
+              if (tabLatex) tabLatex.classList.add('active');
+              if (tabContents['latex']) tabContents['latex'].classList.add('active');
+          }
           showToast('📝 Loaded!');
         });
 
@@ -259,12 +310,12 @@ document.addEventListener('DOMContentLoaded', () => {
           showToast('🗑️ Deleted');
         });
 
-        const exportBtn = document.createElement('button');
-        exportBtn.className = 'action-btn';
-        exportBtn.textContent = '📄 .docx';
-        exportBtn.addEventListener('click', (e) => { e.stopPropagation(); exportToWord(eq.latex); });
+        const expBtn = document.createElement('button');
+        expBtn.className = 'action-btn';
+        expBtn.textContent = '📄 .docx';
+        expBtn.addEventListener('click', (e) => { e.stopPropagation(); exportToWord(eq.latex); });
 
-        actionsDiv.append(loadBtn, exportBtn, delBtn);
+        actionsDiv.append(loadBtn, expBtn, delBtn);
         card.append(mathDiv, latexDiv, actionsDiv);
         grid.appendChild(card);
       });
@@ -272,22 +323,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Clear all
-  document.getElementById('clearAllBtn').addEventListener('click', async () => {
-    if (!confirm('Delete all saved equations?')) return;
-    localStorage.removeItem('mv_equations');
-    loadSavedEquations();
-    showToast('🗑️ Cleared');
-  });
+  const clearBtn = document.getElementById('clearAllBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', async () => {
+        if (!confirm('Delete all saved equations?')) return;
+        localStorage.removeItem('mv_equations');
+        loadSavedEquations();
+        showToast('🗑️ Cleared');
+    });
+  }
 
   // ========================
   //  Export to Word (.docx)
   // ========================
-  document.getElementById('exportWordBtn').addEventListener('click', () => {
-    if (!currentLatex) { showToast('⚠️ No equation'); return; }
-    exportToWord(currentLatex);
-  });
+  window.exportToWord = function(latex) {
+    const lx = latex || currentLatex;
+    if (!lx) { showToast('⚠️ No equation'); return; }
+    performWordExport(lx);
+  };
 
-  async function exportToWord(latex) {
+  async function performWordExport(latex) {
     showToast('📄 Generating Word doc...');
     try {
       const imgData = await latexToImage(latex);
@@ -381,6 +436,19 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========================
 //  Global Functions (called from HTML onclick)
 // ========================
+function switchPalette(btn) {
+  const container = btn.closest('.math-palette');
+  const tabId = btn.dataset.tab;
+  
+  // Update tabs
+  container.querySelectorAll('.palette-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  
+  // Update content
+  container.querySelectorAll('.palette-content').forEach(c => c.classList.remove('active'));
+  container.querySelector('#palette-' + tabId).classList.add('active');
+}
+
 function showModal(id) { document.getElementById(id).classList.add('show'); }
 function hideModal(id) { document.getElementById(id).classList.remove('show'); }
 

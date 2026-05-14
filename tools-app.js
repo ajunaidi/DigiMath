@@ -477,11 +477,88 @@ function copyDoc() { navigator.clipboard.writeText(lastDocSummary).then(() => sh
 // ========================
 //  RESEARCH (Wikipedia + AI)
 // ========================
+// ========================
+//  RESEARCH (World Database: ArXiv + Wikipedia)
+// ========================
+let currentResearchSource = 'arxiv';
+
+function toggleResearchSource(source) {
+  currentResearchSource = source;
+  document.getElementById('btnArxiv').classList.toggle('active', source === 'arxiv');
+  document.getElementById('btnWiki').classList.toggle('active', source === 'wiki');
+  showToast('🔍 Source switched to: ' + source.toUpperCase());
+}
+
+async function searchGlobalResearch() {
+  const query = document.getElementById('wikiInput').value.trim();
+  if (!query) { showToast('⚠️ Enter a research topic'); return; }
+  
+  if (currentResearchSource === 'arxiv') {
+    searchArXiv(query);
+  } else {
+    searchWiki(query);
+  }
+}
+
+async function searchArXiv(query) {
+  const out = document.getElementById('researchResult');
+  out.innerHTML = '<div class="output-placeholder"><div>⏳ Fetching World Research Papers...</div></div>';
+  
+  try {
+    // Using a public CORS proxy for ArXiv (since they block direct browser requests)
+    const proxy = 'https://api.allorigins.win/get?url=';
+    const targetUrl = `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&start=0&max_results=10`;
+    const res = await fetch(proxy + encodeURIComponent(targetUrl));
+    if (!res.ok) throw new Error('ArXiv database connection failed');
+    
+    const data = await res.json();
+    const xmlText = data.contents;
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+    const entries = xmlDoc.getElementsByTagName("entry");
+    
+    if (entries.length === 0) {
+      out.innerHTML = '<div style="padding:20px; text-align:center">❌ No research papers found for this topic.</div>';
+      return;
+    }
+    
+    let html = `<h2><i class="fa-solid fa-graduation-cap"></i> World Research Papers (${entries.length})</h2><br>`;
+    
+    for (let i = 0; i < entries.length; i++) {
+      const title = entries[i].getElementsByTagName("title")[0].textContent;
+      const summary = entries[i].getElementsByTagName("summary")[0].textContent.substring(0, 200) + '...';
+      const pdfLink = entries[i].getElementsByTagName("id")[0].textContent.replace('abs', 'pdf');
+      const published = new Date(entries[i].getElementsByTagName("published")[0].textContent).getFullYear();
+      
+      html += `
+        <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px solid var(--border-glass); margin-bottom:12px">
+          <div style="font-weight:700; color:var(--accent-primary); margin-bottom:8px">${title} (${published})</div>
+          <div style="font-size:13px; color:var(--text-sub); margin-bottom:12px">${summary}</div>
+          <div style="display:flex; gap:8px">
+            <a href="${pdfLink}" target="_blank" class="preset-btn" style="text-decoration:none; font-size:11px"><i class="fa-solid fa-file-pdf"></i> Read PDF</a>
+            <button class="preset-btn" style="font-size:11px" onclick="askAIAboutWiki('${title.replace(/'/g,"\\'")}','${summary.replace(/'/g,"\\'")}')"><i class="fa-solid fa-robot"></i> Explain Paper</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    out.innerHTML = html;
+    showToast('✅ Found ' + entries.length + ' research papers');
+  } catch (err) {
+    console.error('ArXiv Error:', err);
+    out.innerHTML = `
+      <div style="color:var(--text-sub);padding:20px;text-align:center">
+        <i class="fa-solid fa-circle-exclamation"></i> Database is busy or offline.<br>
+        <button class="preset-btn" style="margin-top:10px" onclick="searchWiki()">Try Wikipedia instead</button>
+      </div>`;
+  }
+}
+
 async function searchWiki() {
   const query = document.getElementById('wikiInput').value.trim();
-  if (!query) { showToast('⚠️ Enter a search term'); return; }
-  const out = document.getElementById('wikiResult');
-  out.innerHTML = '<div class="output-placeholder"><div>⏳ Searching...</div></div>';
+  if (!query) return;
+  const out = document.getElementById('researchResult');
+  out.innerHTML = '<div class="output-placeholder"><div>⏳ Searching Wikipedia...</div></div>';
   try {
     const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
     const res = await fetch(url);
@@ -501,8 +578,6 @@ async function searchWiki() {
     out.innerHTML = `<div style="color:var(--danger);padding:16px">❌ ${err.message}<br><br><small>Try a different search term</small></div>`;
   }
 }
-
-// Redundant quickSearch removed (using the one at the top)
 
 async function askAIAboutWiki(title, context) {
   const aiOut = document.getElementById('researchAIOutput');
@@ -675,6 +750,27 @@ function saveSettings() {
 
 function showModal(id) { document.getElementById(id).classList.add('active'); }
 function hideModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ========================
+//  Math Palette Helpers
+// ========================
+function switchPalette(btn) {
+  const container = btn.closest('.math-palette');
+  const tabId = btn.dataset.tab;
+  container.querySelectorAll('.palette-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.palette-content').forEach(c => c.classList.remove('active'));
+  container.querySelector('#palette-' + tabId).classList.add('active');
+}
+
+function insertSymbolInto(inputId, symbol) {
+  const inp = document.getElementById(inputId);
+  const pos = inp.selectionStart || inp.value.length;
+  inp.value = inp.value.substring(0, pos) + symbol + inp.value.substring(pos);
+  inp.focus();
+  // Trigger input event if needed
+  inp.dispatchEvent(new Event('input', { bubbles: true }));
+}
 
 // ========================
 //  Toast
